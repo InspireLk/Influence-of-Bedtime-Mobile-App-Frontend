@@ -1,10 +1,7 @@
 import axios from 'axios';
 
-import { BED_TIME_SERVER_URL } from '@env';
+const axiosInstance = axios.create({ baseURL: process.env.EXPO_PUBLIC_API_URL });
 
-// ----------------------------------------------------------------------
-
-const axiosInstance = axios.create({ baseURL: BED_TIME_SERVER_URL });
 
 axiosInstance.interceptors.response.use(
   (res) => res,
@@ -23,20 +20,15 @@ export const fetcher = async (args) => {
   return res.data;
 };
 
-// ----------------------------------------------------------------------
-
 export const endpoints = {
+
   auth: {
-    me: '/api/auth/me',
-    login: '/api/auth/login',
-    register: '/api/auth/register',
-    refresh_token: '/api/auth/refresh_token',
+    sign_in: '/registration/admins/getadminbymail',
   },
-  user: {
-    update_account: '/api/user/update_account',
-    update_password: '/api/user/update_password',
-    get_users_for_admin: 'api/user/get-all-users-to-admin',
-    update_user: '/api/user/update_user',
-    get_staff_for_admin: 'api/user/get-all-staff-for-admin',
+  main: {
+    get_node_list_for_admin: '/tree-main-hierarchy-nodes/getAttendanceForms',
+    get_attendace_data: '/attendances/getAttendanceData', //'+lg_user_id+'/'+lg_user_table_id+'/'+user_code+'/'+node_mid+'/'+caller_user_id+'/'+caller_table_id
+    mark_attendance: '/attendances/addQR'
   },
+  
 };
