@@ -3,7 +3,6 @@ import React, { useMemo, useReducer, useCallback, useEffect } from 'react';
 import axios, { endpoints } from '@/utils/axios';
 import { AuthContext } from './auth-context';
 import { Alert } from 'react-native';
-// import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from 'react-native-toast-message';
 
 
@@ -132,12 +131,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     const sign_in = async (email: string, password: string) => {
         try {
-            const response = await axios.get(`${endpoints.auth.sign_in}/${email}?password=${password}`);
+
+            const response = await axios.post(`${endpoints.auth.sign_in}/${email}?password=${password}`);
 
             if (response.data.success) {
             
 
-                const jsonValue = JSON.stringify(response.data.user);
+                // const jsonValue = JSON.stringify(response.data.user);
                 // await AsyncStorage.setItem('user', jsonValue);
 
                 dispatch({

@@ -42,17 +42,17 @@ interface AuthLayoutProps {
 }
 
 const AuthLayout: React.FC<AuthLayoutProps> = ({ isReady, router, colorScheme }) => {
-  const { admin, loading } = useAuthContext();
+  const { user, loading } = useAuthContext();
 
   useEffect(() => {
     if (isReady && !loading) {
-      if (admin) {
+      if (user) {
         router.replace('/(tabs)');
       } else {
         router.replace('/(auth)');
       }
     }
-  }, [isReady, admin,loading,router]);
+  }, [isReady, user,loading,router]);
 
   if (!isReady && loading) {
     return <LoadingScreen/>
