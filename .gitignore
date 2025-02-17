@@ -79,3 +79,5 @@ yarn-error.log
 expo-env.d.ts
 .env
 # @end expo-cli
+
+.vscode
