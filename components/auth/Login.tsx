@@ -4,6 +4,7 @@ import { ThemedText } from '@/components/ThemedText';
 import { useAuthContext } from '@/context/hooks/use-auth-context';
 import { useRouter } from 'expo-router';
 import Toast from 'react-native-toast-message';
+import { ThemedView } from '../ThemedView';
 
 // import { AuthContext } from '@/auth/AuthProvider';
 
@@ -51,7 +52,7 @@ export default function LoginScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <ThemedView style={styles.container}>
       <TextInput
         style={[styles.input, { color: colorScheme === 'dark' ? '#ffffff' : '#000000' }]}
         placeholder="Email"
@@ -78,16 +79,19 @@ export default function LoginScreen() {
             />
         )
       }
-   </View>
+   </ThemedView>
   );
 }
 
 
 const styles = StyleSheet.create({
+
   container: {
-    flex: 1,
+    padding:10,
     justifyContent: 'center',
-    padding: 16,
+    display:'flex',
+    alignItems:'center',
+    marginTop:50
   },
   input: {
     height: 50,
