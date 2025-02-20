@@ -4,6 +4,7 @@ import axios, { endpoints } from '@/utils/axios';
 import { AuthContext } from './auth-context';
 import { Alert } from 'react-native';
 import Toast from 'react-native-toast-message';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 interface StateType {
@@ -137,8 +138,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
             if (response.data.success) {
             
 
-                // const jsonValue = JSON.stringify(response.data.user);
-                // await AsyncStorage.setItem('user', jsonValue);
+                const jsonValue = JSON.stringify(response.data.user);
+                await AsyncStorage.setItem('user', jsonValue);
 
                 dispatch({
                     type: 'SIGNIN',

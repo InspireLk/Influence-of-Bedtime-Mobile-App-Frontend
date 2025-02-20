@@ -8,8 +8,10 @@ import { AuthProvider } from '../context/auth/index';
 import { useAuthContext } from '../context/hooks/use-auth-context';
 import Toast  from 'react-native-toast-message';
 import LoadingScreen from '@/components/LoadingScreen';
+import { createDrawerNavigator } from '@react-navigation/drawer'; // Import Drawer
 
 SplashScreen.preventAutoHideAsync()
+const Drawer = createDrawerNavigator(); // Drawer instance
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -62,7 +64,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ isReady, router, colorScheme })
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack>
         <Stack.Screen name='(auth)' />
-        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="(tabs)" options={{ headerShown:false}}/>
         <Stack.Screen name="+not-found" />
       </Stack>
     </ThemeProvider>
