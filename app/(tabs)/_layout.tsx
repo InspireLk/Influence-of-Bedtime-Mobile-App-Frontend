@@ -1,6 +1,8 @@
 import { Tabs } from 'expo-router';
 import React, { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { Platform } from 'react-native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { HapticTab } from '@/components/HapticTab';
 import { IconSymbol } from '@/components/ui/IconSymbol';
@@ -197,6 +199,20 @@ function DrawerNavigator() {
         
       />
     </Drawer.Navigator>
+  );
+}
+
+
+export default function TabLayout() {
+
+  const colorScheme = useColorScheme();
+
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="Main" component={DrawerNavigator} />
+    </Stack.Navigator>
+
+   
   );
 }
 
