@@ -1,103 +1,63 @@
-import React, { useState, useEffect } from "react";
-import {
-  StyleSheet,
-  View,
-  Text,
-  Image,
-  TextInput,
-  TouchableOpacity,
-} from "react-native";
-import { useRoute } from "@react-navigation/native";
-import { moodImages, moodData, MoodType } from "./scan_my_face";
+import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 
-export default function MoodDetailScreen() {
-  const route = useRoute();
-  const { date } = route.params;
-
-  const [note, setNote] = useState<string>("");
-
-  const moodDetails = moodData[date];
-  const moodImage = moodDetails ? moodDetails.image : null;
-  const mood = moodDetails ? moodDetails.mood : "No Mood";
-
-  const handleSaveNote = () => {
-    // Logic to save note
-    console.log("Note saved:", note);
-    alert("Note saved!");
-  };
+export default function MoodDetailsScreen() {
+  // Dummy data
+  const mood = 'Neutral';
+  const date = 'Monday';
+  const image = 'https://randomuser.me/api/portraits/women/44.jpg'; // Placeholder image
+  const note = 'Simply dummy text of the printing and typesetting industry.';
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Mood Detail</Text>
+      {/* Navigation Header */}
+      <View style={styles.header}>
+        <TouchableOpacity>
+          <Text style={styles.navButton}>{'◀'}</Text>
+        </TouchableOpacity>
+        <Text style={styles.dayText}>{date}</Text>
+        <TouchableOpacity>
+          <Text style={styles.navButton}>{'▶'}</Text>
+        </TouchableOpacity>
+      </View>
 
-      {/* Display Mood Image */}
-      {moodImage && <Image source={moodImage} style={styles.moodImage} />}
+      {/* Image Section */}
+      <Image source={{ uri: image }} style={styles.moodImage} />
 
+      {/* Mood & Note Section */}
       <Text style={styles.moodText}>{mood}</Text>
-      <Text style={styles.dateText}>Date: {date}</Text>
+      <View style={styles.noteContainer}>
+        <Text style={styles.noteText}>{note}</Text>
+        <View style={styles.buttonRow}>
+          <TouchableOpacity style={styles.editButton}>
+            <Text style={styles.buttonText}>Edit</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.deleteButton}>
+            <Text style={styles.buttonText}>Delete</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
 
-      {/* Add a Note */}
-      <TextInput
-        style={styles.textInput}
-        placeholder="Add a note"
-        value={note}
-        onChangeText={setNote}
-        multiline
-      />
-
-      <TouchableOpacity style={styles.saveButton} onPress={handleSaveNote}>
-        <Text style={styles.saveButtonText}>Save Note</Text>
+      {/* Add New Note Button */}
+      <TouchableOpacity style={styles.addNoteButton}>
+        <Text style={styles.addNoteText}>➕ Add new note</Text>
       </TouchableOpacity>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: "#FFF",
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 20,
-  },
-  moodImage: {
-    width: 100,
-    height: 100,
-    alignSelf: "center",
-    marginBottom: 20,
-  },
-  moodText: {
-    fontSize: 18,
-    textAlign: "center",
-    marginBottom: 10,
-  },
-  dateText: {
-    fontSize: 16,
-    textAlign: "center",
-    color: "#888",
-    marginBottom: 20,
-  },
-  textInput: {
-    height: 100,
-    borderColor: "#ccc",
-    borderWidth: 1,
-    borderRadius: 8,
-    padding: 10,
-    marginBottom: 20,
-  },
-  saveButton: {
-    backgroundColor: "#FF9800",
-    padding: 12,
-    borderRadius: 10,
-    alignItems: "center",
-  },
-  saveButtonText: {
-    color: "#FFF",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
+  container: { flex: 1, alignItems: 'center', padding: 20, backgroundColor: '#F8F8F8' },
+  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '100%' },
+  navButton: { fontSize: 24, fontWeight: 'bold' },
+  dayText: { fontSize: 20, fontWeight: '600' },
+  moodImage: { width: 120, height: 120, borderRadius: 10, marginVertical: 20 },
+  moodText: { fontSize: 18, fontWeight: 'bold', marginBottom: 10 },
+  noteContainer: { backgroundColor: 'white', padding: 15, borderRadius: 10, width: '90%', shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 5 },
+  noteText: { fontSize: 14, color: '#555' },
+  buttonRow: { flexDirection: 'row', justifyContent: 'space-around', marginTop: 10 },
+  editButton: { backgroundColor: '#A4E57A', padding: 8, borderRadius: 5 },
+  deleteButton: { backgroundColor: '#FF6B6B', padding: 8, borderRadius: 5 },
+  buttonText: { color: 'white', fontWeight: 'bold' },
+  addNoteButton: { flexDirection: 'row', alignItems: 'center', marginTop: 20 },
+  addNoteText: { fontSize: 16, color: '#FFA500', fontWeight: 'bold' },
 });

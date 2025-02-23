@@ -25,6 +25,7 @@ import SleepRecommendationScreen from './SleepRecommendationScreen';
 import StakeSociety from './StakeSociety';
 import CameraScreen from './CameraScreen';
 import MoodDetailScreen from './MoodDetailScreen';
+import MoodHistory from './MoodHistory';
 
 
 const Drawer = createDrawerNavigator();
@@ -104,6 +105,7 @@ function BottomTabs({ navigation }: any) {
       <Tab.Screen name="Help" component={HelpScreen} options={{tabBarItemStyle:{display:'none'}}}/>
       <Tab.Screen name="CameraScreen" component={CameraScreen} options={{tabBarItemStyle:{display:'none'}}}/>
       <Tab.Screen name="MoodDetailScreen" component={MoodDetailScreen} options={{tabBarItemStyle:{display:'none'}}}/>
+      <Tab.Screen name="MoodHistory" component={MoodHistory} options={{tabBarItemStyle:{display:'none'}}}/>
       
     </Tab.Navigator>
   );
