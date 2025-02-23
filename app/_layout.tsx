@@ -9,6 +9,7 @@ import { useAuthContext } from '../context/hooks/use-auth-context';
 import Toast  from 'react-native-toast-message';
 import LoadingScreen from '@/components/LoadingScreen';
 import { createDrawerNavigator } from '@react-navigation/drawer'; // Import Drawer
+import SleepRecommendationScreen from './(tabs)/SleepRecommendationScreen';
 
 SplashScreen.preventAutoHideAsync()
 const Drawer = createDrawerNavigator(); // Drawer instance
@@ -48,11 +49,11 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ isReady, router, colorScheme })
 
   useEffect(() => {
     if (isReady && !loading) {
-      if (user) {
+      // if (user) {
         router.replace('/(tabs)');
-      } else {
-        router.replace('/(auth)');
-      }
+      // } else {
+      //   router.replace('/(auth)');
+      // }
     }
   }, [isReady, user,loading,router]);
 
