@@ -21,7 +21,11 @@ import ScanMyFaceScreen from './scan_my_face';
 import MySleepPredictionsScreen from './my_sleep_preditions';
 import SleepInterventionScreen from './sleep_intervention';
 import HelpScreen from './help';
-
+import SleepRecommendationScreen from './SleepRecommendationScreen';
+import StakeSociety from './StakeSociety';
+import CameraScreen from './CameraScreen';
+import MoodDetailScreen from './MoodDetailScreen';
+import MoodHistory from './MoodHistory';
 
 
 const Drawer = createDrawerNavigator();
@@ -93,10 +97,16 @@ function BottomTabs({ navigation }: any) {
       <Tab.Screen name="Best Bed Time" component={BestBedTimeScreen} />
       <Tab.Screen name="Scan My Face" component={ScanMyFaceScreen} options={{tabBarItemStyle:{display:'none'}}}/>
       <Tab.Screen name="My Sleep Predictions" component={MySleepPredictionsScreen} options={{tabBarItemStyle:{display:'none'}}}/>
+      <Tab.Screen name="Stake Society" component={StakeSociety} options={{tabBarItemStyle:{display:'none'}}}/>
+      <Tab.Screen name='SleepRecommendation' component={SleepRecommendationScreen} options={{tabBarItemStyle:{display:'none'}}}/>
       <Tab.Screen name="Sleep Intervention" component={SleepInterventionScreen} options={{tabBarItemStyle:{display:'none'}}}/>
       <Tab.Screen name="Settings" component={SettingScreen} />
       <Tab.Screen name="About" component={AboutScreen} options={{tabBarItemStyle:{display:'none'}}}/>
       <Tab.Screen name="Help" component={HelpScreen} options={{tabBarItemStyle:{display:'none'}}}/>
+      <Tab.Screen name="CameraScreen" component={CameraScreen} options={{tabBarItemStyle:{display:'none'}}}/>
+      <Tab.Screen name="MoodDetailScreen" component={MoodDetailScreen} options={{tabBarItemStyle:{display:'none'}}}/>
+      <Tab.Screen name="MoodHistory" component={MoodHistory} options={{tabBarItemStyle:{display:'none'}}}/>
+      
     </Tab.Navigator>
   );
 }
@@ -146,6 +156,14 @@ function DrawerNavigator() {
         }}
       />
       <Drawer.Screen
+        name="Stake Society"
+        component={BottomTabs}
+        initialParams={{ screen: 'Stake Society' }}
+        options={{
+          drawerLabel: "Stake Society"
+        }}
+      />
+      <Drawer.Screen
         name="Sleep Intervention"
         component={BottomTabs}
         initialParams={{ screen: 'Sleep Intervention' }}
@@ -176,6 +194,7 @@ function DrawerNavigator() {
         options={{
           drawerLabel: "Help"
         }}
+        
       />
     </Drawer.Navigator>
   );
