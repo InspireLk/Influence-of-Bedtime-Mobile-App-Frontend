@@ -78,7 +78,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const [state, dispatch] = useReducer(reducer, initialState);
 
     const initialize = useCallback(async () => {
-
+        
         dispatch({
             type:'START_LOADING',
             payload:{
@@ -159,22 +159,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
         try{
             
-            const response = await axios.post(endpoints.auth.sign_in, userObject);
+            const response = await axios.post(endpoints.auth.sign_up, userObject);
 
-            console.log('===================response=================');
-            console.log(response);
-            console.log('====================================');
             
             dispatch({
                 type: 'SIGN_UP',
                 payload: {
-                    signup_state: response.data.data
+                    signup_state: response.data
                 },
             });
         }catch(error){
-            console.log('==============error455======================');
-            console.log(error);
-            console.log('====================================');
+            
             Toast.show({type:'error',text1:'Sign Up failed. Please try again.',position:'bottom', swipeable:true})
         }
     
