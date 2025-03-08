@@ -20,7 +20,7 @@ export default function LoginScreen() {
   // const [email, setEmail] = useState('sysadmin@edfoci.onmicrosoft.com');
   // const [password, setPassword] = useState('qlzwinkbwrseqgnh');
 
-  const [email, setEmail] = useState('sahan@gmail.com');
+  const [email, setEmail] = useState('sahanrandika@gmail.com');
   const [password, setPassword] = useState('sahan');
 
   const [buttonLoading, setButtonLoading] = useState(false);
