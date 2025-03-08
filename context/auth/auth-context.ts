@@ -8,6 +8,8 @@ export interface AuthContextType {
   sign_in?: (email: string, password: string) => Promise<void>;
   sign_out?: () => void;
   sign_up?: (userObject: any) => Promise<void>;
+  submit_survay_state:  any;
+  submitSurvay?:(survayObject: any, _id:string) => Promise<void>;
   
 }
 

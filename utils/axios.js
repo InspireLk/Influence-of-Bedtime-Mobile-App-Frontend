@@ -36,6 +36,10 @@ export const endpoints = {
   auth: {
     sign_in: '/api/auth/sign_in',
     sign_up: '/api/auth/sign_up',
+    me: '/api/auth/me'
   },
+  user:{
+    submit_survay: '/api/user/submit_survay'
+  }
   
 };

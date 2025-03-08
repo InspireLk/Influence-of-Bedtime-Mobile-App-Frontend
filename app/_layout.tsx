@@ -5,38 +5,57 @@ import { useEffect, useState } from 'react';
 import 'react-native-reanimated';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { AuthProvider } from '../context/auth/index';
-import { useAuthContext } from '../context/hooks/use-auth-context';
 import Toast  from 'react-native-toast-message';
 import LoadingScreen from '@/components/LoadingScreen';
 import { createDrawerNavigator } from '@react-navigation/drawer'; // Import Drawer
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import SleepRecommendationScreen from './(tabs)/SleepRecommendationScreen';
+import { useAuthContext } from '@/context/hooks/use-auth-context';
 
 SplashScreen.preventAutoHideAsync()
 const Drawer = createDrawerNavigator(); // Drawer instance
 
 export default function RootLayout() {
+
   const colorScheme = useColorScheme();
   const [isReady, setIsReady] = useState(false);
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
-  const [user, setUser] = useState(AsyncStorage.getItem('user'));
+  const [user, setUser] = useState<any>(null);
 
   const router = useRouter();
+
+  const fetchUser = async () => {
+      
+    try {
+      
+      const userString = await AsyncStorage.getItem('user');
+  
+      if (userString !== null) {
+        const user = JSON.parse(userString);
+        setUser(user);
+      }
+      else{
+        setUser(null)
+      }
+    } catch (error) {
+      console.error('Error fetching user:', error);
+    }
+  };
 
   useEffect(() => {
     
     if (loaded) {
       SplashScreen.hideAsync();
       setIsReady(true);
-      setUser(AsyncStorage.getItem('user'))
+      fetchUser();
     }
   }, [loaded]);
 
   return (
     <AuthProvider>
-      <AuthLayout user={user} isReady={isReady} router={router} colorScheme={colorScheme} />
+      <AuthLayout  isReady={isReady} router={router} colorScheme={colorScheme} />
       <Toast/>
     </AuthProvider>
   );
@@ -46,22 +65,22 @@ interface AuthLayoutProps {
   isReady: boolean;
   router: ReturnType<typeof useRouter>;
   colorScheme: any;
-  user:any
+  // user:any
 }
 
-const AuthLayout: React.FC<AuthLayoutProps> = ({ user, isReady, router, colorScheme }) => {
-  const { loading } = useAuthContext();
+const AuthLayout: React.FC<AuthLayoutProps> = ({ isReady, router, colorScheme }) => {
+  const { loading, user } = useAuthContext();
 
   
 
   useEffect(() => {
     
     if (isReady && !loading) {
-      // if (user) {
+      if (user) {
         router.replace('/(tabs)');
-      // } else {
-      //   router.replace('/(auth)');
-      // }
+      } else {
+        router.replace('/(auth)');
+      }
     }
   }, [isReady, user,loading,router]);
 
