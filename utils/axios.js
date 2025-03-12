@@ -1,6 +1,8 @@
-import axios from 'axios';
+import axios from "axios";
 
-const axiosInstance = axios.create({ baseURL: process.env.EXPO_PUBLIC_API_URL });
+const axiosInstance = axios.create({
+  baseURL: process.env.EXPO_PUBLIC_API_URL,
+});
 
 axiosInstance.interceptors.request.use(
   (config) => {
@@ -14,8 +16,10 @@ axiosInstance.interceptors.request.use(
 axiosInstance.interceptors.response.use(
   (res) => res,
   (error) => {
-    console.log('Error Response:', error);
-    Promise.reject((error.response && error.response.data) || 'Something went wrong')
+    console.log("Error Response:", error);
+    Promise.reject(
+      (error.response && error.response.data) || "Something went wrong"
+    );
   }
 );
 
@@ -32,14 +36,16 @@ export const fetcher = async (args) => {
 };
 
 export const endpoints = {
-
   auth: {
-    sign_in: '/api/auth/sign_in',
-    sign_up: '/api/auth/sign_up',
-    me: '/api/auth/me'
+    sign_in: "/api/auth/sign_in",
+    sign_up: "/api/auth/sign_up",
+    me: "/api/auth/me",
   },
-  user:{
-    submit_survay: '/api/user/submit_survay'
-  }
-  
+  user: {
+    submit_survay: "/api/user/submit_survay",
+  },
+  sleepPrediction: {
+    addRecord: "/api/sleep/addRecord",
+    getAllRecords: "/api/sleep/getRecords",
+  },
 };

@@ -1,164 +1,174 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { useNavigation, useFocusEffect } from '@react-navigation/native'; // Import useFocusEffect
-import { Ionicons, FontAwesome } from '@expo/vector-icons';
+import React, { useState } from "react";
+import { View, Text, Button } from "react-native";
+import { LineChart } from "react-native-chart-kit";
+import { Dimensions, ScrollView } from "react-native";
+import tw from "twrnc";
+import axios, { endpoints } from "@/utils/axios";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import { predictSleepDuration } from "@/utils/helper";
+import { useRouter } from "expo-router";
 
-// Define sleep prediction data type
-type SleepPrediction = {
-  bestSleepDay: string;
-  totalSleepHours: number;
-  sleepIssue: string;
+export type SleepRecord = {
+  date: string;
+  sleepDuration: number;
 };
 
-// Dummy API function (simulates fetching sleep predictions)
-const fetchSleepPredictions = async (): Promise<SleepPrediction> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({
-        bestSleepDay: 'Saturdays',
-        totalSleepHours: 41.23,
-        sleepIssue: 'Long hours of screentime before bed seems to be the toughest battle you have',
-      });
-    }, 1500); // Simulate network delay
-  });
+const getSleepQuality = (averageSleep: number) => {
+  if (averageSleep >= 7) return { label: "Good", color: "green" };
+  if (averageSleep >= 5) return { label: "Warning", color: "yellow" };
+  return { label: "Bad", color: "red" };
 };
 
 const SleepPredictionScreen = () => {
-  const [data, setData] = useState<SleepPrediction | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [sleepRecords, setSleepRecords] = useState<SleepRecord[]>([]);
+  const [predictedSleep, setPredictedSleep] = useState<number[]>([]);
+  const [predictedDates, setPredictedDates] = useState<string[]>([]);
   const navigation = useNavigation();
+  const router = useRouter();
 
-  // Use useFocusEffect to refetch data when the screen is focused
   useFocusEffect(
     React.useCallback(() => {
-      setLoading(true); // Reset loading state
-      fetchSleepPredictions().then((response) => {
-        setData(response);
-        setLoading(false);
-      });
+      const fetchSleepRecords = async () => {
+        const response = await axios.get(
+          endpoints.sleepPrediction.getAllRecords
+        );
+        const data = await response.data;
+
+        const records: SleepRecord[] = data.map((item: any) => ({
+          date: item.date,
+          sleepDuration: item.sleepDuration,
+        }));
+
+        const sortedRecords = records
+          .sort(
+            (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+          )
+          .slice(0, 5);
+
+        setSleepRecords(sortedRecords);
+
+        const lastRecordDate = new Date(sortedRecords[0].date);
+        const predictedDatesData = [
+          new Date(
+            lastRecordDate.setDate(lastRecordDate.getDate() + 1)
+          ).toLocaleDateString(),
+          new Date(
+            lastRecordDate.setDate(lastRecordDate.getDate() + 1)
+          ).toLocaleDateString(),
+        ];
+
+        const predictedSleepData = predictSleepDuration(sortedRecords);
+
+        setPredictedSleep(predictedSleepData);
+        setPredictedDates(predictedDatesData);
+      };
+
+      fetchSleepRecords();
     }, [])
   );
 
+  const averageSleep =
+    [...sleepRecords.map((r) => r.sleepDuration), ...predictedSleep].reduce(
+      (a, b) => a + b,
+      0
+    ) /
+    (sleepRecords.length + predictedSleep.length);
+  const sleepQuality = getSleepQuality(averageSleep);
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.header}>Here’s what your sleep might look like ahead</Text>
+    <ScrollView
+      style={tw`flex-1 mt-5`}
+      contentContainerStyle={tw`items-center`}
+    >
+      <Text style={tw`text-xl font-bold mb-4`}>
+        Your Predicted Sleep Pattern
+      </Text>
 
-      {loading ? (
-        <ActivityIndicator size="large" color="#4A90E2" />
-      ) : (
+      {sleepRecords.length > 0 && predictedSleep.length > 0 ? (
         <>
-          {/* Best Sleep Day Box */}
-          <View style={styles.bestSleepContainer}>
-            <FontAwesome name="calendar" size={50} color="#FFD700" />
-            <Text style={styles.bestSleepText}>
-              In terms of day of the week, {'\n'}
-              <Text style={styles.boldText}>You will have best sleep on {data?.bestSleepDay}</Text>
-            </Text>
-          </View>
+          <LineChart
+            verticalLabelRotation={90}
+            xLabelsOffset={0}
+            data={{
+              labels: [
+                ...sleepRecords.map((record) =>
+                  new Date(record.date).toLocaleDateString()
+                ),
+                ...predictedDates,
+              ],
+              datasets: [
+                {
+                  data: [
+                    ...sleepRecords.map((record) => record.sleepDuration),
+                    ...new Array(predictedDates.length).fill(null),
+                  ],
+                  strokeWidth: 2,
+                  color: (opacity = 1) => `rgba(0, 0, 255, ${opacity})`,
+                },
+                {
+                  data: [
+                    ...new Array(sleepRecords.length).fill(null),
+                    ...predictedSleep,
+                  ],
+                  strokeWidth: 2,
+                  color: (opacity = 1) => `rgba(255, 0, 0, ${opacity})`,
+                },
+              ],
+            }}
+            width={Dimensions.get("window").width}
+            height={400}
+            chartConfig={{
+              backgroundColor: "#ffffff",
+              backgroundGradientFrom: "#ffffff",
+              backgroundGradientTo: "#ffffff",
+              decimalPlaces: 1,
+              color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+              labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+              style: {
+                borderRadius: 16,
+              },
+              propsForDots: {
+                r: "6",
+                strokeWidth: "2",
+                stroke: "#ffa726",
+              },
+            }}
+            bezier
+          />
 
-          {/* Two Cards Section */}
-          <View style={styles.cardContainer}>
-            <View style={styles.sleepHoursCard}>
-              <Ionicons name="time-outline" size={50} color="black" />
-              <Text style={styles.sleepHoursText}>
-                You will most likely sleep {'\n'}
-                <Text style={styles.boldText}>{data?.totalSleepHours} hours next week</Text>
+          <View style={tw`mt-5 p-4 bg-gray-100 rounded-lg w-11/12`}>
+            <Text style={tw`text-lg font-semibold`}>Sleep Habit Analysis</Text>
+            <Text style={tw`text-base mt-2`}>
+              Your average sleep duration is{" "}
+              <Text style={tw`font-bold`}>{averageSleep.toFixed(1)} hours</Text>
+              .
+            </Text>
+            <View
+              style={tw`mt-3 px-4 py-2 rounded-full self-start bg-${sleepQuality.color}-500`}
+            >
+              <Text style={tw`text-white font-semibold`}>
+                {sleepQuality.label} Sleep
               </Text>
             </View>
-
-            <View style={styles.issueCard}>
-              <Ionicons name="phone-portrait-outline" size={50} color="black"/>
-              <Text style={styles.sleepIssueText}>{data?.sleepIssue}</Text>
-            </View>
           </View>
 
-          {/* Button to navigate to SleepRecommendationScreen */}
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => navigation.navigate('SleepRecommendation' as never)}
-          >
-            <Text style={styles.buttonText}>Show sleep recommendations</Text>
-          </TouchableOpacity>
+          <View style={tw`mt-10 w-11/12`}>
+            <Button
+              title="View Detailed Analysis"
+              onPress={() =>
+                router.push({
+                  pathname: "/(tabs)/SleepRecommendationScreen",
+                  params: { sleepQualityColor: sleepQuality.color },
+                })
+              }
+            />
+          </View>
         </>
+      ) : (
+        <Text style={tw`text-lg text-gray-500`}>Loading...</Text>
       )}
-    </View>
+    </ScrollView>
   );
 };
 
 export default SleepPredictionScreen;
-
-// Styles
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F5F5F5',
-    padding: 20,
-    
-  },
-  header: {
-    fontSize: 16,
-    fontWeight: '500',
-    marginBottom: 20,
-  },
-  bestSleepContainer: {
-    backgroundColor: '#4f6179',
-    padding: 15,
-    borderRadius: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 15,
-    height: '25%'
-  },
-  bestSleepText: {
-    color: 'white',
-    marginLeft: 10,
-    fontSize: 16,
-  },
-  boldText: {
-    fontWeight: 'bold',
-  },
-  cardContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    height: '30%',
-    
-  },
-  sleepHoursCard: {
-    backgroundColor: '#FFD700',
-    padding: 15,
-    borderRadius: 10,
-    flex: 1,
-    marginRight: 10,
-    alignItems: 'center',
-    
-  },
-  issueCard: {
-    backgroundColor: '#FFFFFF',
-    padding: 15,
-    borderRadius: 10,
-    flex: 1,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#DDD',
-  },
-  sleepHoursText: {
-    marginTop: 40,
-    fontSize: 12,
-  },
-  sleepIssueText: {
-    marginTop: 40,
-    fontSize: 12,
-  },
-  button: {
-    backgroundColor: '#a2c4f2',
-    paddingVertical: 12,
-    borderRadius: 10,
-    marginTop: 150,
-    alignItems: 'center',
-  },
-  buttonText: {
-
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-});
