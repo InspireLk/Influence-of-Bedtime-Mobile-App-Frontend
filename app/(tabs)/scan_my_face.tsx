@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Image  } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 // Map emotions to images
@@ -76,10 +76,10 @@ const Calendar = ({ onMonthChange }) => {
   const generateCalendarDays = () => {
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
-    
+
     const daysInMonth = getDaysInMonth(year, month);
     const firstDay = getFirstDayOfMonth(year, month);
-    
+
     // Get days from previous month
     const daysInPrevMonth = getDaysInMonth(year, month - 1);
     const prevMonthDays = Array.from({ length: firstDay }, (_, i) => ({
@@ -123,13 +123,13 @@ const Calendar = ({ onMonthChange }) => {
     const isCurrentMonth = dayInfo.month === 'current';
     const dayStyle = [
       styles.dayButton,
-      { 
+      {
         backgroundColor: isCurrentMonth ? getEmotionColor(dayInfo.full) : '#F0F0F0',
         opacity: isCurrentMonth ? 1 : 0.3
       }
     ];
 
-    
+
 
     return (
       <TouchableOpacity
@@ -145,7 +145,7 @@ const Calendar = ({ onMonthChange }) => {
   };
 
   return (
-    
+
     <View style={styles.calendarContainer}>
       <View style={styles.header}>
         <TouchableOpacity onPress={handlePrevMonth}>
@@ -158,13 +158,13 @@ const Calendar = ({ onMonthChange }) => {
           <Text style={styles.headerButton}>&gt;</Text>
         </TouchableOpacity>
       </View>
-      
+
       <View style={styles.weekDays}>
         {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
           <Text key={day} style={styles.weekDay}>{day}</Text>
         ))}
       </View>
-      
+
       <View style={styles.daysGrid}>
         {generateCalendarDays().map(dayInfo => renderDay(dayInfo))}
       </View>
@@ -187,7 +187,7 @@ const MoodCount = ({ currentDate }) => {
   useEffect(() => {
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth() + 1;
-    
+
     // Count emotions for the current month
     const monthCounts = Object.entries(dummyEmotions).reduce((acc, [date, emotion]) => {
       const [emotionYear, emotionMonth] = date.split('-').map(Number);
@@ -225,28 +225,28 @@ const MoodCount = ({ currentDate }) => {
           <Text style={styles.historyButton}>History</Text>
         </TouchableOpacity>
       </View>
-      
+
       <View style={styles.gaugeContainer}>
         <View style={styles.gauge}>
           {Object.keys(emotionColors).map((emotion) => {
             const width = calculateWidth(emotion);
             return width !== '0%' ? (
-              <View 
+              <View
                 key={emotion}
                 style={[
-                  styles.gaugeSegment, 
-                  { 
+                  styles.gaugeSegment,
+                  {
                     backgroundColor: emotionColors[emotion],
                     width: width
                   }
-                ]} 
+                ]}
               />
             ) : null;
           })}
         </View>
         <Text style={styles.gaugeNumber}>{totalMoods}</Text>
       </View>
-      
+
       {/* Replace Emotion Dots with Images */}
       <View style={styles.emotionsGrid}>
         {Object.entries(counts).map(([emotion, count]) => (
@@ -261,19 +261,21 @@ const MoodCount = ({ currentDate }) => {
 };
 
 export default function MoodTrackerScreen() {
+
+  const navigation = useNavigation();
   const [currentViewDate, setCurrentViewDate] = useState(new Date(2025, 1));
 
-      // Get today's date in YYYY-MM-DD format
+  // Get today's date in YYYY-MM-DD format
   const today = new Date();
   const formattedToday = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
   // Get today's emotion or default to "Neutral"
   const todayEmotion = dummyEmotions[formattedToday] || 'Neutral';
-  
+
 
   return (
     <ScrollView style={styles.container}>
-       {/* Emotion Display with Dynamic Styling */}
+      {/* Emotion Display with Dynamic Styling */}
       <View style={[styles.todayEmotionContainer, { backgroundColor: emotionColors[todayEmotion] || '#FFD700' }]}>
         <Text style={styles.todayEmotionText}>
           Today you're {todayEmotion} 😊
@@ -281,7 +283,10 @@ export default function MoodTrackerScreen() {
       </View>
       <Calendar onMonthChange={setCurrentViewDate} />
       <MoodCount currentDate={currentViewDate} />
-      <TouchableOpacity style={styles.checkMoodButton}>
+      <TouchableOpacity style={styles.checkMoodButton}
+        onPress={() => navigation.navigate('MoodCamera' as never)}
+      >
+
         <Text style={styles.checkMoodText}>Check my Mood</Text>
       </TouchableOpacity>
     </ScrollView>
@@ -323,7 +328,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
-  
+
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -362,11 +367,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     margin: 2, // Reduce margin for tighter layout
   },
-  
+
   dayText: {
     fontSize: 12, // Smaller text
   },
-  
+
   dayTextFaded: {
     color: '#999',
   },

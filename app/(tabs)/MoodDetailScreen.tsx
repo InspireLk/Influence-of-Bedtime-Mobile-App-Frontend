@@ -1,63 +1,174 @@
-import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import {
+  View, Text, Image, TextInput, TouchableOpacity,
+  StyleSheet, SafeAreaView, KeyboardAvoidingView,
+  Platform, ScrollView, Keyboard, TouchableWithoutFeedback
+} from 'react-native';
 
-export default function MoodDetailsScreen() {
-  // Dummy data
-  const mood = 'Neutral';
-  const date = 'Monday';
-  const image = 'https://randomuser.me/api/portraits/women/44.jpg'; // Placeholder image
-  const note = 'Simply dummy text of the printing and typesetting industry.';
+const MoodDetailsScreen = ({ route }) => {
+  const [reason, setReason] = useState('');
+  const { photoUri } = route.params;
+  const { mood } = route.params || 'happy';
+
+  // Add current date formatting
+  const getCurrentDate = () => {
+    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const now = new Date();
+    const dayName = days[now.getDay()];
+    return dayName;
+  };
+
+  const date = getCurrentDate();
+
+  const handleSave = () => {
+    // Here you would save the mood data
+    console.log('Saving mood:', { mood, reason, photoUri });
+    // Navigate back or to another screen
+  };
 
   return (
-    <View style={styles.container}>
-      {/* Navigation Header */}
-      <View style={styles.header}>
-        <TouchableOpacity>
-          <Text style={styles.navButton}>{'◀'}</Text>
-        </TouchableOpacity>
-        <Text style={styles.dayText}>{date}</Text>
-        <TouchableOpacity>
-          <Text style={styles.navButton}>{'▶'}</Text>
-        </TouchableOpacity>
-      </View>
+    <SafeAreaView style={styles.container}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.keyboardAvoid}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 40 : 0}
+      >
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <ScrollView
+            contentContainerStyle={styles.scrollContent}
+            keyboardShouldPersistTaps="handled"
+          >
 
-      {/* Image Section */}
-      <Image source={{ uri: image }} style={styles.moodImage} />
+            <View style={styles.header}>
+              <Text style={styles.dayText}>{date}</Text>
+            </View>
+            <View style={styles.content}>
+              <View style={styles.imageContainer}>
+                <Image
+                  source={{ uri: photoUri }}
+                  style={styles.image}
+                  resizeMode="contain"
+                />
+              </View>
 
-      {/* Mood & Note Section */}
-      <Text style={styles.moodText}>{mood}</Text>
-      <View style={styles.noteContainer}>
-        <Text style={styles.noteText}>{note}</Text>
-        <View style={styles.buttonRow}>
-          <TouchableOpacity style={styles.editButton}>
-            <Text style={styles.buttonText}>Edit</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.deleteButton}>
-            <Text style={styles.buttonText}>Delete</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+              <View style={styles.moodSection}>
+                <Text style={styles.moodTitle}>
+                  Today you're {mood},
+                </Text>
+                <Text style={styles.moodQuestion}>
+                  What is the reason?
+                </Text>
+              </View>
 
-      {/* Add New Note Button */}
-      <TouchableOpacity style={styles.addNoteButton}>
-        <Text style={styles.addNoteText}>➕ Add new note</Text>
-      </TouchableOpacity>
-    </View>
+              <View style={styles.inputContainer}>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Type here.."
+                  multiline
+                  value={reason}
+                  onChangeText={setReason}
+                  placeholderTextColor="#999"
+                />
+                <TouchableOpacity
+                  style={styles.saveButton}
+                  onPress={handleSave}
+                >
+                  <Text style={styles.saveButtonText}>Save</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </ScrollView>
+        </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
-}
+};
 
 const styles = StyleSheet.create({
-  container: { flex: 1, alignItems: 'center', padding: 20, backgroundColor: '#F8F8F8' },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '100%' },
-  navButton: { fontSize: 24, fontWeight: 'bold' },
-  dayText: { fontSize: 20, fontWeight: '600' },
-  moodImage: { width: 120, height: 120, borderRadius: 10, marginVertical: 20 },
-  moodText: { fontSize: 18, fontWeight: 'bold', marginBottom: 10 },
-  noteContainer: { backgroundColor: 'white', padding: 15, borderRadius: 10, width: '90%', shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 5 },
-  noteText: { fontSize: 14, color: '#555' },
-  buttonRow: { flexDirection: 'row', justifyContent: 'space-around', marginTop: 10 },
-  editButton: { backgroundColor: '#A4E57A', padding: 8, borderRadius: 5 },
-  deleteButton: { backgroundColor: '#FF6B6B', padding: 8, borderRadius: 5 },
-  buttonText: { color: 'white', fontWeight: 'bold' },
-  addNoteButton: { flexDirection: 'row', alignItems: 'center', marginTop: 20 },
-  addNoteText: { fontSize: 16, color: '#FFA500', fontWeight: 'bold' },
+  container: {
+    flex: 1,
+    backgroundColor: '#F7F7F7',
+  },
+  header: {
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 25,
+  },
+  dayText: {
+    fontSize: 20,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  keyboardAvoid: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: 100, // Add extra padding at bottom
+  },
+  content: {
+    flex: 1,
+    alignItems: 'center',
+    padding: 20,
+  },
+  imageContainer: {
+    width: '80%',
+    height: 200, // Fixed height instead of percentage
+    marginTop: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  image: {
+    width: '100%',
+    height: '100%',
+  },
+  moodSection: {
+    marginTop: 20,
+    alignItems: 'center',
+    width: '100%',
+  },
+  moodTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 8,
+  },
+  moodQuestion: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  inputContainer: {
+    marginTop: 20,
+    width: '90%',
+    backgroundColor: 'white',
+    borderRadius: 15,
+    padding: 15,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+    marginBottom: 20,
+  },
+  input: {
+    fontSize: 16,
+    color: '#333',
+    paddingVertical: 12,
+    minHeight: 100,
+  },
+  saveButton: {
+    alignSelf: 'flex-end',
+    backgroundColor: '#A5EEB8',
+    paddingVertical: 10,
+    paddingHorizontal: 25,
+    borderRadius: 20,
+  },
+  saveButtonText: {
+    fontSize: 16,
+    color: '#333',
+  },
 });
+
+export default MoodDetailsScreen;
