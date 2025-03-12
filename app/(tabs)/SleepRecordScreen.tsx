@@ -25,7 +25,7 @@ const SleepRecordScreen = () => {
       sleepDuration: hoursSlept,
       dailyStepCount: stepCount,
     });
-    if (response.status == 201) {
+    if (response.status === 201) {
       Alert.alert("Success", "Record saved successfully");
     } else {
       Alert.alert("Error", "Failed to save record");

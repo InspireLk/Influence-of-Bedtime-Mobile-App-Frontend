@@ -46,5 +46,6 @@ export const endpoints = {
   },
   sleepPrediction: {
     addRecord: "/api/sleep/addRecord",
+    getAllRecords: "/api/sleep/getRecords",
   },
 };

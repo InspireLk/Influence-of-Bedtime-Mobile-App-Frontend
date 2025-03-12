@@ -1,42 +1,75 @@
-import { StyleSheet, Image, Platform } from 'react-native';
+import React from "react";
+import { View, Text, ScrollView, TouchableOpacity } from "react-native";
+import tw from "twrnc";
+import { Feather } from "@expo/vector-icons"; // Icons for navigation
 
-import { Collapsible } from '@/components/Collapsible';
-import { ExternalLink } from '@/components/ExternalLink';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-import { IconSymbol } from '@/components/ui/IconSymbol';
-
-export default function AboutScreen() {
+const AboutScreen = () => {
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-      headerImage={
-        <IconSymbol
-          size={310}
-          color="#808080"
-          name="chevron.left.forwardslash.chevron.right"
-          style={styles.headerImage}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">About</ThemedText>
-      </ThemedView>
-      <ThemedText>This app includes example code to help you get started.</ThemedText>
-      
-    </ParallaxScrollView>
-  );
-}
+    <ScrollView style={tw`flex-1 bg-gray-100`}>
+      {/* Header */}
+      <View style={tw`bg-white p-4 border-b border-gray-300`}>
+        <Text style={tw`text-xl font-bold text-gray-800`}>About</Text>
+      </View>
 
-const styles = StyleSheet.create({
-  headerImage: {
-    color: '#808080',
-    bottom: -90,
-    left: -35,
-    position: 'absolute',
-  },
-  titleContainer: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-});
+      {/* App Information */}
+      <View style={tw`bg-white p-6 mt-4`}>
+        <Text style={tw`text-lg font-bold text-gray-800`}>
+          GoodNight Sleep Tracker App
+        </Text>
+        <Text style={tw`text-gray-500 text-sm mt-2`}>Version: 1.0.0</Text>
+        <Text style={tw`text-gray-700 text-sm mt-2`}>
+          This app helps you monitor and improve your sleep patterns using
+          AI-based predictions.
+        </Text>
+      </View>
+
+      {/* Additional Information */}
+      <View style={tw`bg-white p-4 mt-4`}>
+        <TouchableOpacity
+          style={tw`flex-row justify-between items-center py-3 border-b border-gray-200`}
+        >
+          <Text style={tw`text-base text-gray-700`}>Privacy Policy</Text>
+          <Feather name="chevron-right" size={20} color="gray" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={tw`flex-row justify-between items-center py-3 border-b border-gray-200`}
+        >
+          <Text style={tw`text-base text-gray-700`}>Terms of Service</Text>
+          <Feather name="chevron-right" size={20} color="gray" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={tw`flex-row justify-between items-center py-3`}
+        >
+          <Text style={tw`text-base text-gray-700`}>Open Source Licenses</Text>
+          <Feather name="chevron-right" size={20} color="gray" />
+        </TouchableOpacity>
+      </View>
+
+      {/* Contact Section */}
+      <View style={tw`bg-white p-4 mt-4`}>
+        <Text style={tw`text-gray-500 uppercase text-xs mb-3`}>Support</Text>
+        <TouchableOpacity
+          style={tw`flex-row justify-between items-center py-3 border-b border-gray-200`}
+        >
+          <Text style={tw`text-base text-gray-700`}>Help & Support</Text>
+          <Feather name="chevron-right" size={20} color="gray" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={tw`flex-row justify-between items-center py-3`}
+        >
+          <Text style={tw`text-base text-gray-700`}>Contact Us</Text>
+          <Feather name="chevron-right" size={20} color="gray" />
+        </TouchableOpacity>
+      </View>
+
+      {/* Footer */}
+      <View style={tw`p-4 mt-6 items-center`}>
+        <Text style={tw`text-gray-500 text-xs`}>
+          © 2025 GoodNight. All rights reserved.
+        </Text>
+      </View>
+    </ScrollView>
+  );
+};
+
+export default AboutScreen;
