@@ -17,7 +17,7 @@ import SettingScreen from './settings';
 import AboutScreen from './about';
 import { createStackNavigator } from '@react-navigation/stack';
 import BestBedTimeScreen from './best_bed_time';
-import ScanMyFaceScreen from './scan_my_face';
+import MoodTrackerScreen from './scan_my_face';
 import MySleepPredictionsScreen from './my_sleep_preditions';
 import SleepInterventionScreen from './sleep_intervention';
 import HelpScreen from './help';
@@ -26,6 +26,7 @@ import StakeSociety from './StakeSociety';
 import CameraScreen from './CameraScreen';
 import MoodDetailScreen from './MoodDetailScreen';
 import MoodHistory from './MoodHistory';
+import MoodCamera from './MoodCamera';
 
 
 const Drawer = createDrawerNavigator();
@@ -54,7 +55,7 @@ const getIconName = (routeName: string): keyof typeof Ionicons.glyphMap => {
     case 'Help':
       return 'help-circle';
     default:
-      return 'help-circle'; 
+      return 'help-circle';
   }
 };
 
@@ -69,7 +70,7 @@ function BottomTabs({ navigation }: any) {
     navigation.setOptions({ title: route.name });
   }, [route.name]);
 
-  
+
   const hideTabs = [
     'Scan My Face',
     'My Sleep Predictions',
@@ -95,21 +96,36 @@ function BottomTabs({ navigation }: any) {
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Account" component={AccountScreen} />
       <Tab.Screen name="Best Bed Time" component={BestBedTimeScreen} />
-      <Tab.Screen name="Scan My Face" component={ScanMyFaceScreen} options={{tabBarItemStyle:{display:'none'}}}/>
-      <Tab.Screen name="My Sleep Predictions" component={MySleepPredictionsScreen} options={{tabBarItemStyle:{display:'none'}}}/>
-      <Tab.Screen name="Stake Society" component={StakeSociety} options={{tabBarItemStyle:{display:'none'}}}/>
-      <Tab.Screen name='SleepRecommendation' component={SleepRecommendationScreen} options={{tabBarItemStyle:{display:'none'}}}/>
-      <Tab.Screen name="Sleep Intervention" component={SleepInterventionScreen} options={{tabBarItemStyle:{display:'none'}}}/>
+      <Tab.Screen name="Scan My Face" component={MoodTrackerScreen} options={{ tabBarItemStyle: { display: 'none' } }} />
+      <Tab.Screen name="My Sleep Predictions" component={MySleepPredictionsScreen} options={{ tabBarItemStyle: { display: 'none' } }} />
+      <Tab.Screen name="Stake Society" component={StakeSociety} options={{ tabBarItemStyle: { display: 'none' } }} />
+      <Tab.Screen name='SleepRecommendation' component={SleepRecommendationScreen} options={{ tabBarItemStyle: { display: 'none' } }} />
+      <Tab.Screen name="Sleep Intervention" component={SleepInterventionScreen} options={{ tabBarItemStyle: { display: 'none' } }} />
       <Tab.Screen name="Settings" component={SettingScreen} />
-      <Tab.Screen name="About" component={AboutScreen} options={{tabBarItemStyle:{display:'none'}}}/>
-      <Tab.Screen name="Help" component={HelpScreen} options={{tabBarItemStyle:{display:'none'}}}/>
-      <Tab.Screen name="CameraScreen" component={CameraScreen} options={{tabBarItemStyle:{display:'none'}}}/>
-      <Tab.Screen name="MoodDetailScreen" component={MoodDetailScreen} options={{tabBarItemStyle:{display:'none'}}}/>
-      <Tab.Screen name="MoodHistory" component={MoodHistory} options={{tabBarItemStyle:{display:'none'}}}/>
-      
+      <Tab.Screen name="About" component={AboutScreen} options={{ tabBarItemStyle: { display: 'none' } }} />
+      <Tab.Screen name="Help" component={HelpScreen} options={{ tabBarItemStyle: { display: 'none' } }} />
+      <Tab.Screen name="CameraScreen" component={CameraScreen} options={{ tabBarItemStyle: { display: 'none' } }} />
+      <Tab.Screen name="MoodDetailScreen" component={MoodDetailScreen} options={{ tabBarItemStyle: { display: 'none' } }} />
+      <Tab.Screen name="MoodHistory" component={MoodHistory} options={{ tabBarItemStyle: { display: 'none' } }} />
+
     </Tab.Navigator>
   );
 }
+
+const MoodTrackerStack = () => {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen
+        name="MoodTracker"
+        component={MoodTrackerScreen}
+        options={{ headerTitle: "Scan My Face" }}
+      />
+      <Stack.Screen name="MoodCamera" component={MoodCamera} />
+      <Stack.Screen name="MoodDetailScreen" component={MoodDetailScreen} />
+      <Stack.Screen name="MoodHistory" component={MoodHistory} />
+    </Stack.Navigator>
+  );
+};
 
 function DrawerNavigator() {
 
@@ -141,11 +157,8 @@ function DrawerNavigator() {
       />
       <Drawer.Screen
         name="Scan My Face"
-        component={BottomTabs}
-        initialParams={{ screen: 'Scan My Face' }}
-        options={{
-          drawerLabel: "Scan My Face"
-        }}
+        component={MoodTrackerStack}
+        options={{ headerShown: false }}
       />
       <Drawer.Screen
         name="My Sleep Predictions"
@@ -194,7 +207,7 @@ function DrawerNavigator() {
         options={{
           drawerLabel: "Help"
         }}
-        
+
       />
     </Drawer.Navigator>
   );
@@ -210,6 +223,6 @@ export default function TabLayout() {
       <Stack.Screen name="Main" component={DrawerNavigator} />
     </Stack.Navigator>
 
-   
+
   );
 }
