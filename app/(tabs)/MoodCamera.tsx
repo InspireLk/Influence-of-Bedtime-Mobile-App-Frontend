@@ -1,20 +1,66 @@
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
-import React, { useState, useRef } from 'react';
-import { Button, StyleSheet, Text, TouchableOpacity, View, ActivityIndicator, Platform } from 'react-native';
+import React, { useState, useRef, useEffect } from 'react';
+import { Button, StyleSheet, Text, TouchableOpacity, View, ActivityIndicator, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import * as FileSystem from 'expo-file-system';
+import { io } from 'socket.io-client';
 
 // API URL configuration - using your specific IP address
-const API_URL = 'http://192.168.8.152:5000/detect_emotion';
+const SERVER_URL = 'http://192.168.8.152:5000';
 
 export default function MoodCamera() {
   const [facing, setFacing] = useState<CameraType>('front');
   const [permission, requestPermission] = useCameraPermissions();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isStreaming, setIsStreaming] = useState(false);
+  const [currentEmotion, setCurrentEmotion] = useState('Unknown');
+  const [processedImage, setProcessedImage] = useState<string | null>(null);
+
   const cameraRef = useRef<CameraView>(null);
+  const socketRef = useRef<any>(null);
+  const streamIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const navigation = useNavigation();
+
+  // Set up socket connection
+  useEffect(() => {
+    // Initialize socket
+    socketRef.current = io(SERVER_URL);
+
+    // Socket event listeners
+    socketRef.current.on('connect', () => {
+      console.log('Connected to server');
+    });
+
+    socketRef.current.on('disconnect', () => {
+      console.log('Disconnected from server');
+      setIsStreaming(false);
+      if (streamIntervalRef.current) {
+        clearInterval(streamIntervalRef.current);
+        streamIntervalRef.current = null;
+      }
+    });
+
+    socketRef.current.on('emotion_result', (data) => {
+      setCurrentEmotion(data.emotion);
+      setProcessedImage(data.processed_image);
+    });
+
+    socketRef.current.on('error', (data) => {
+      setError(data.message);
+    });
+
+    // Clean up on unmount
+    return () => {
+      if (streamIntervalRef.current) {
+        clearInterval(streamIntervalRef.current);
+      }
+      if (socketRef.current) {
+        socketRef.current.disconnect();
+      }
+    };
+  }, []);
 
   if (!permission) {
     return <View />;
@@ -45,40 +91,59 @@ export default function MoodCamera() {
     }
   };
 
-  const detectEmotion = async (base64Image: string) => {
-    try {
-      const response = await fetch(API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: JSON.stringify({
-          image: base64Image,
-        }),
-      });
+  const captureFrame = async () => {
+    if (cameraRef.current) {
+      try {
+        const photo = await cameraRef.current.takePictureAsync({
+          quality: 0.2,  // Lower quality for faster streaming
+          exif: false,   // Reduce file size
+        });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`HTTP error! Status: ${response.status}, Response: ${errorText}`);
+        if (photo) {
+          const base64Image = await convertToBase64(photo.uri);
+          return base64Image;
+        }
+      } catch (error: any) {
+        console.error('Failed to capture frame:', error);
+        setError(error.message || 'Error capturing frame');
+        return null;
       }
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      console.error('Error detecting emotion:', error);
-      throw error;
+    }
+    return null;
+  };
+
+  const toggleStreaming = async () => {
+    if (isStreaming) {
+      // Stop streaming
+      setIsStreaming(false);
+      if (streamIntervalRef.current) {
+        clearInterval(streamIntervalRef.current);
+        streamIntervalRef.current = null;
+      }
+    } else {
+      // Start streaming
+      setIsStreaming(true);
+      setError(null);
+
+      // Stream frames at a rate of 5 frames per second
+      streamIntervalRef.current = setInterval(async () => {
+        const base64Image = await captureFrame();
+        if (base64Image && socketRef.current?.connected) {
+          socketRef.current.emit('frame', { image: base64Image });
+        }
+      }, 200);  // 200ms interval = 5fps
     }
   };
 
-  const takePicture = async () => {
+  const takeSinglePicture = async () => {
     if (cameraRef.current) {
       try {
         setLoading(true);
         setError(null);
 
         const photo = await cameraRef.current.takePictureAsync({
-          quality: 0.5,  // Lower quality to reduce file size
-          exif: false,   // Reduce file size
+          quality: 0.5,
+          exif: false,
         });
 
         if (photo) {
@@ -88,20 +153,12 @@ export default function MoodCamera() {
           const base64Image = await convertToBase64(photo.uri);
           console.log('Image converted to base64, length:', base64Image.length);
 
-          // Call the emotion detection API
-          const result = await detectEmotion(base64Image);
-          console.log('API result:', result);
-
-          // If API call is successful, navigate to the next screen
-          if (result && result.emotion) {
-            navigation.navigate('MoodDetailScreen', {
-              photoUri: photo.uri,
-              mood: result.emotion,
-              processedImageBase64: result.processed_image
-            });
-          } else {
-            setError('Could not detect emotion. Please try again.');
-          }
+          // Navigate to details screen with the captured photo
+          navigation.navigate('MoodDetailScreen', {
+            photoUri: photo.uri,
+            mood: currentEmotion,
+            processedImageBase64: processedImage
+          });
         }
       } catch (error: any) {
         console.error('Failed to process image:', error);
@@ -119,9 +176,32 @@ export default function MoodCamera() {
         facing={facing}
         ref={cameraRef}
       >
+        {processedImage && (
+          <View style={styles.overlayContainer}>
+            <Image
+              source={{ uri: `data:image/jpeg;base64,${processedImage}` }}
+              style={styles.overlay}
+              resizeMode="contain"
+            />
+          </View>
+        )}
+
+        <View style={styles.emotionContainer}>
+          <Text style={styles.emotionText}>Current Emotion: {currentEmotion}</Text>
+        </View>
+
         <View style={styles.controlsContainer}>
           <TouchableOpacity style={styles.controlButton} onPress={toggleCameraFacing}>
             <Ionicons name="camera-reverse" size={32} color="white" />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.streamButton, isStreaming ? styles.streamingActive : {}]}
+            onPress={toggleStreaming}
+          >
+            <Text style={styles.streamButtonText}>
+              {isStreaming ? 'Stop Stream' : 'Start Stream'}
+            </Text>
           </TouchableOpacity>
 
           {loading ? (
@@ -131,7 +211,7 @@ export default function MoodCamera() {
           ) : (
             <TouchableOpacity
               style={styles.captureButton}
-              onPress={takePicture}
+              onPress={takeSinglePicture}
               disabled={loading}
             >
               <View style={styles.captureButtonInner} />
@@ -161,6 +241,30 @@ const styles = StyleSheet.create({
   camera: {
     flex: 1,
   },
+  overlayContainer: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  overlay: {
+    width: '100%',
+    height: '100%',
+    opacity: 0.9,
+  },
+  emotionContainer: {
+    position: 'absolute',
+    top: 40,
+    left: 0,
+    right: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    padding: 10,
+  },
+  emotionText: {
+    color: 'white',
+    fontSize: 18,
+    textAlign: 'center',
+    fontWeight: 'bold',
+  },
   controlsContainer: {
     position: 'absolute',
     bottom: 40,
@@ -178,6 +282,21 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  streamButton: {
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    borderRadius: 25,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  streamingActive: {
+    backgroundColor: 'rgba(255, 0, 0, 0.6)',
+  },
+  streamButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
   },
   captureButton: {
     width: 70,
