@@ -17,9 +17,19 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff",
-        "permissions": ["CAMERA"]
-      }
+        "backgroundColor": "#ffffff"
+      },
+      "permissions": [
+        "CAMERA",
+        "INTERNET",
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
+        "CAMERA",
+        "INTERNET",
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ],
+      "package": "com.anonymous.InfluenceofBedtime"
     },
     "web": {
       "bundler": "metro",
@@ -48,9 +58,6 @@
     ],
     "experiments": {
       "typedRoutes": true
-    },
-    "permissions": {
-      "camera": true
     }
   }
 }
