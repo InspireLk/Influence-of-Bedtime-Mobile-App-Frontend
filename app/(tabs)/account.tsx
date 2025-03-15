@@ -1,109 +1,81 @@
-import { StyleSheet, Image, Platform } from 'react-native';
+import React from "react";
+import { View, Text, TouchableOpacity, ScrollView, Image } from "react-native";
+import tw from "twrnc";
+import { Feather } from "@expo/vector-icons"; // Icons for navigation
 
-import { Collapsible } from '@/components/Collapsible';
-import { ExternalLink } from '@/components/ExternalLink';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-import { IconSymbol } from '@/components/ui/IconSymbol';
-
-export default function AccountScreen() {
+const AccountScreen = () => {
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-      headerImage={
-        <IconSymbol
-          size={310}
-          color="#808080"
-          name="chevron.left.forwardslash.chevron.right"
-          style={styles.headerImage}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Explore</ThemedText>
-      </ThemedView>
-      <ThemedText>This app includes example code to help you get started.</ThemedText>
-      <Collapsible title="File-based routing">
-        <ThemedText>
-          This app has two screens:{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/explore.tsx</ThemedText>
-        </ThemedText>
-        <ThemedText>
-          The layout file in <ThemedText type="defaultSemiBold">app/(tabs)/_layout.tsx</ThemedText>{' '}
-          sets up the tab navigator.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/router/introduction">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Android, iOS, and web support">
-        <ThemedText>
-          You can open this project on Android, iOS, and the web. To open the web version, press{' '}
-          <ThemedText type="defaultSemiBold">w</ThemedText> in the terminal running this project.
-        </ThemedText>
-      </Collapsible>
-      <Collapsible title="Images">
-        <ThemedText>
-          For static images, you can use the <ThemedText type="defaultSemiBold">@2x</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">@3x</ThemedText> suffixes to provide files for
-          different screen densities
-        </ThemedText>
-        <Image source={require('@/assets/images/react-logo.png')} style={{ alignSelf: 'center' }} />
-        <ExternalLink href="https://reactnative.dev/docs/images">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Custom fonts">
-        <ThemedText>
-          Open <ThemedText type="defaultSemiBold">app/_layout.tsx</ThemedText> to see how to load{' '}
-          <ThemedText style={{ fontFamily: 'SpaceMono' }}>
-            custom fonts such as this one.
-          </ThemedText>
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/versions/latest/sdk/font">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Light and dark mode components">
-        <ThemedText>
-          This template has light and dark mode support. The{' '}
-          <ThemedText type="defaultSemiBold">useColorScheme()</ThemedText> hook lets you inspect
-          what the user's current color scheme is, and so you can adjust UI colors accordingly.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Animations">
-        <ThemedText>
-          This template includes an example of an animated component. The{' '}
-          <ThemedText type="defaultSemiBold">components/HelloWave.tsx</ThemedText> component uses
-          the powerful <ThemedText type="defaultSemiBold">react-native-reanimated</ThemedText>{' '}
-          library to create a waving hand animation.
-        </ThemedText>
-        {Platform.select({
-          ios: (
-            <ThemedText>
-              The <ThemedText type="defaultSemiBold">components/ParallaxScrollView.tsx</ThemedText>{' '}
-              component provides a parallax effect for the header image.
-            </ThemedText>
-          ),
-        })}
-      </Collapsible>
-    </ParallaxScrollView>
-  );
-}
+    <ScrollView style={tw`flex-1 bg-gray-100`}>
+      {/* Header */}
+      <View style={tw`bg-white p-4 border-b border-gray-300`}>
+        <Text style={tw`text-xl font-bold text-gray-800`}>Account</Text>
+      </View>
 
-const styles = StyleSheet.create({
-  headerImage: {
-    color: '#808080',
-    bottom: -90,
-    left: -35,
-    position: 'absolute',
-  },
-  titleContainer: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-});
+      {/* Profile Section */}
+      <View style={tw`bg-white p-6 items-center mt-4`}>
+        <Image
+          source={{ uri: "https://via.placeholder.com/100" }}
+          style={tw`w-24 h-24 rounded-full mb-3`}
+        />
+        <Text style={tw`text-lg font-bold text-gray-800`}>John Doe</Text>
+        <Text style={tw`text-gray-500 text-sm`}>johndoe@example.com</Text>
+      </View>
+
+      {/* Account Options */}
+      <View style={tw`bg-white p-4 mt-4`}>
+        <TouchableOpacity
+          style={tw`flex-row justify-between items-center py-3 border-b border-gray-200`}
+        >
+          <Text style={tw`text-base text-gray-700`}>Edit Profile</Text>
+          <Feather name="chevron-right" size={20} color="gray" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={tw`flex-row justify-between items-center py-3 border-b border-gray-200`}
+        >
+          <Text style={tw`text-base text-gray-700`}>Change Password</Text>
+          <Feather name="chevron-right" size={20} color="gray" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={tw`flex-row justify-between items-center py-3 border-b border-gray-200`}
+        >
+          <Text style={tw`text-base text-gray-700`}>Payment Methods</Text>
+          <Feather name="chevron-right" size={20} color="gray" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={tw`flex-row justify-between items-center py-3`}
+        >
+          <Text style={tw`text-base text-gray-700`}>Connected Accounts</Text>
+          <Feather name="chevron-right" size={20} color="gray" />
+        </TouchableOpacity>
+      </View>
+
+      {/* Privacy & Security */}
+      <View style={tw`bg-white p-4 mt-4`}>
+        <Text style={tw`text-gray-500 uppercase text-xs mb-3`}>Security</Text>
+        <TouchableOpacity
+          style={tw`flex-row justify-between items-center py-3 border-b border-gray-200`}
+        >
+          <Text style={tw`text-base text-gray-700`}>
+            Two-Factor Authentication
+          </Text>
+          <Feather name="chevron-right" size={20} color="gray" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={tw`flex-row justify-between items-center py-3`}
+        >
+          <Text style={tw`text-base text-gray-700`}>Privacy Settings</Text>
+          <Feather name="chevron-right" size={20} color="gray" />
+        </TouchableOpacity>
+      </View>
+
+      {/* Logout Button */}
+      <View style={tw`p-4 mt-6`}>
+        <TouchableOpacity style={tw`bg-red-500 py-3 rounded-lg items-center`}>
+          <Text style={tw`text-white font-bold text-base`}>Log Out</Text>
+        </TouchableOpacity>
+      </View>
+    </ScrollView>
+  );
+};
+
+export default AccountScreen;

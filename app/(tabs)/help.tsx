@@ -1,42 +1,95 @@
-import { StyleSheet, Image, Platform } from 'react-native';
+import React from "react";
+import { View, Text, ScrollView, TouchableOpacity } from "react-native";
+import tw from "twrnc";
+import { Feather } from "@expo/vector-icons"; // For icons
 
-import { Collapsible } from '@/components/Collapsible';
-import { ExternalLink } from '@/components/ExternalLink';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-import { IconSymbol } from '@/components/ui/IconSymbol';
-
-export default function HelpScreen() {
+const HelpScreen = () => {
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-      headerImage={
-        <IconSymbol
-          size={310}
-          color="#808080"
-          name="chevron.left.forwardslash.chevron.right"
-          style={styles.headerImage}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Help</ThemedText>
-      </ThemedView>
-      <ThemedText>This app includes example code to help you get started.</ThemedText>
-      
-    </ParallaxScrollView>
-  );
-}
+    <ScrollView style={tw`flex-1 bg-gray-100`}>
+      {/* Header */}
+      <View style={tw`bg-white p-4 border-b border-gray-300`}>
+        <Text style={tw`text-xl font-bold text-gray-800`}>Help & Support</Text>
+      </View>
 
-const styles = StyleSheet.create({
-  headerImage: {
-    color: '#808080',
-    bottom: -90,
-    left: -35,
-    position: 'absolute',
-  },
-  titleContainer: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-});
+      {/* Help Topics */}
+      <View style={tw`bg-white p-4 mt-4`}>
+        <Text style={tw`text-gray-500 uppercase text-xs mb-3`}>
+          Help Topics
+        </Text>
+        <TouchableOpacity
+          style={tw`flex-row justify-between items-center py-3 border-b border-gray-200`}
+        >
+          <Text style={tw`text-base text-gray-700`}>Getting Started</Text>
+          <Feather name="chevron-right" size={20} color="gray" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={tw`flex-row justify-between items-center py-3 border-b border-gray-200`}
+        >
+          <Text style={tw`text-base text-gray-700`}>
+            How Sleep Tracking Works
+          </Text>
+          <Feather name="chevron-right" size={20} color="gray" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={tw`flex-row justify-between items-center py-3`}
+        >
+          <Text style={tw`text-base text-gray-700`}>
+            Understanding Predictions
+          </Text>
+          <Feather name="chevron-right" size={20} color="gray" />
+        </TouchableOpacity>
+      </View>
+
+      {/* FAQs */}
+      <View style={tw`bg-white p-4 mt-4`}>
+        <Text style={tw`text-gray-500 uppercase text-xs mb-3`}>FAQs</Text>
+        <TouchableOpacity
+          style={tw`flex-row justify-between items-center py-3 border-b border-gray-200`}
+        >
+          <Text style={tw`text-base text-gray-700`}>
+            How do I log my sleep?
+          </Text>
+          <Feather name="chevron-right" size={20} color="gray" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={tw`flex-row justify-between items-center py-3 border-b border-gray-200`}
+        >
+          <Text style={tw`text-base text-gray-700`}>
+            Why are my sleep predictions inaccurate?
+          </Text>
+          <Feather name="chevron-right" size={20} color="gray" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={tw`flex-row justify-between items-center py-3`}
+        >
+          <Text style={tw`text-base text-gray-700`}>
+            How can I improve my sleep score?
+          </Text>
+          <Feather name="chevron-right" size={20} color="gray" />
+        </TouchableOpacity>
+      </View>
+
+      {/* Contact Support */}
+      <View style={tw`bg-white p-4 mt-4`}>
+        <Text style={tw`text-gray-500 uppercase text-xs mb-3`}>
+          Need More Help?
+        </Text>
+        <TouchableOpacity
+          style={tw`flex-row justify-between items-center py-3`}
+        >
+          <Text style={tw`text-base text-blue-500`}>Contact Support</Text>
+          <Feather name="mail" size={20} color="blue" />
+        </TouchableOpacity>
+      </View>
+
+      {/* Footer */}
+      <View style={tw`p-4 mt-6 items-center`}>
+        <Text style={tw`text-gray-500 text-xs`}>
+          © 2025 GoodNight. All rights reserved.
+        </Text>
+      </View>
+    </ScrollView>
+  );
+};
+
+export default HelpScreen;
