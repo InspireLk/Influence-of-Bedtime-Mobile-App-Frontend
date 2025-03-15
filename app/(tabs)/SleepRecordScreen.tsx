@@ -1,16 +1,9 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  Button,
-  StyleSheet,
-  Alert,
-  TouchableOpacity,
-} from "react-native";
-import { Provider, DefaultTheme } from "react-native-paper";
+import { View, Text, TextInput, Alert, TouchableOpacity } from "react-native";
+import { Provider } from "react-native-paper";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import axios, { endpoints } from "@/utils/axios";
+import tw from "twrnc";
 
 const SleepRecordScreen = () => {
   const [hoursSlept, setHoursSlept] = useState("");
@@ -25,6 +18,7 @@ const SleepRecordScreen = () => {
       sleepDuration: hoursSlept,
       dailyStepCount: stepCount,
     });
+
     if (response.status === 201) {
       Alert.alert("Success", "Record saved successfully");
     } else {
@@ -33,39 +27,42 @@ const SleepRecordScreen = () => {
   };
 
   return (
-    <Provider theme={DefaultTheme}>
-      <View style={styles.container}>
-        <Text style={styles.title}>Sleep Record</Text>
+    <Provider>
+      <View style={tw`flex-1 bg-white px-6 pt-12`}>
+        <Text style={tw`text-2xl font-bold text-center mb-6`}>
+          Sleep Record
+        </Text>
 
         {/* Hours Slept Input */}
         <TextInput
-          style={styles.input}
+          style={tw`border border-gray-300 rounded-lg px-4 py-3 text-lg mb-4 bg-gray-100`}
           placeholder="Hours Slept"
           keyboardType="numeric"
           value={hoursSlept}
           onChangeText={setHoursSlept}
         />
 
+        {/* Step Count Input */}
         <TextInput
-          style={styles.input}
-          placeholder="Ho many steps did you walk"
+          style={tw`border border-gray-300 rounded-lg px-4 py-3 text-lg mb-4 bg-gray-100`}
+          placeholder="How many steps did you walk?"
           keyboardType="numeric"
           value={stepCount}
           onChangeText={setStepCount}
         />
 
+        {/* Date Picker */}
         <TouchableOpacity
           onPress={() => setShowDatePicker(true)}
           activeOpacity={0.7}
         >
           <TextInput
-            style={styles.input}
+            style={tw`border border-gray-300 rounded-lg px-4 py-3 text-lg mb-4 bg-gray-100`}
             value={date.toDateString()}
-            editable={false} // Prevent manual editing
+            editable={false}
           />
         </TouchableOpacity>
 
-        {/* Date Picker (Hidden by default) */}
         {showDatePicker && (
           <DateTimePicker
             value={date}
@@ -80,7 +77,7 @@ const SleepRecordScreen = () => {
 
         {/* Description Input */}
         <TextInput
-          style={[styles.input, styles.textArea]}
+          style={tw`border border-gray-300 rounded-lg px-4 py-3 text-lg mb-6 bg-gray-100 h-24`}
           placeholder="Describe your day..."
           multiline
           numberOfLines={4}
@@ -89,43 +86,17 @@ const SleepRecordScreen = () => {
         />
 
         {/* Save Button */}
-        <Button title="Save" onPress={handleSave} />
+        <TouchableOpacity
+          style={tw`bg-blue-500 rounded-lg py-3`}
+          onPress={handleSave}
+        >
+          <Text style={tw`text-white text-lg font-semibold text-center`}>
+            Save
+          </Text>
+        </TouchableOpacity>
       </View>
     </Provider>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: "#fff",
-    justifyContent: "center",
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 20,
-    textAlign: "center",
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    padding: 10,
-    borderRadius: 5,
-    fontSize: 16,
-    marginBottom: 15,
-    backgroundColor: "#f9f9f9",
-  },
-  textArea: {
-    height: 100,
-    textAlignVertical: "top",
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: "bold",
-    marginBottom: 5,
-  },
-});
 
 export default SleepRecordScreen;
