@@ -77,7 +77,7 @@ export default function StakeSociety() {
           setSleepCount(getCurrentMonthSleepCount(sortedRecords));
           setStreakLost(
             sortedRecords.length === 0 ||
-              !isStreakBroken(sortedRecords.map((rec) => rec.date))
+            !isStreakBroken(sortedRecords.map((rec) => rec.date))
           );
           setConsecutiveDays(
             getConsecutiveDays(sortedRecords.map((rec) => rec.date))
