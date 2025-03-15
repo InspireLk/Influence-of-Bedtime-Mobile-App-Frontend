@@ -225,14 +225,6 @@ function DrawerNavigator() {
         }}
       />
       <Drawer.Screen
-        name="Stake Society"
-        component={BottomTabs}
-        initialParams={{ screen: 'Stake Society' }}
-        options={{
-          drawerLabel: "Stake Society"
-        }}
-      />
-      <Drawer.Screen
         name="Sleep Intervention"
         component={BottomTabs}
         initialParams={{ screen: "Sleep Intervention" }}
