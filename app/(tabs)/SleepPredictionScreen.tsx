@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, Button } from "react-native";
+import { View, Text, Button, TouchableOpacity } from "react-native";
 import { LineChart } from "react-native-chart-kit";
 import { Dimensions, ScrollView } from "react-native";
 import tw from "twrnc";
@@ -153,7 +153,7 @@ const SleepPredictionScreen = () => {
           </View>
 
           <View style={tw`mt-10 w-11/12`}>
-            <Button
+            {/* <Button
               title="View Detailed Analysis"
               onPress={() =>
                 router.push({
@@ -161,7 +161,17 @@ const SleepPredictionScreen = () => {
                   params: { sleepQualityColor: sleepQuality.color },
                 })
               }
-            />
+            /> */}
+            <TouchableOpacity
+              style={tw`bg-blue-500 rounded-lg py-3`}
+              onPress={() =>
+                navigation.navigate("SleepRecommendation" as never)
+              }
+            >
+              <Text style={tw`text-white text-lg font-semibold text-center`}>
+                View Sleep Recommendations
+              </Text>
+            </TouchableOpacity>
           </View>
         </>
       ) : (
