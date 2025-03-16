@@ -48,4 +48,8 @@ export const endpoints = {
     addRecord: "/api/sleep/addRecord",
     getAllRecords: "/api/sleep/getRecords",
   },
+  sleepIntervention: {
+    save: "/api/intervention/save",
+    findByUserId: "/api/intervention/findByUserId",
+  },
 };
