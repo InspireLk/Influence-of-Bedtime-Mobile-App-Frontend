@@ -196,6 +196,13 @@ const MoodDetailsScreen = ({ route, navigation }) => {
     );
   };
 
+  // Handle navigation to the context page
+  const navigateToContext = () => {
+    if (moodData) {
+      navigation.navigate('MoodIntevention', { moodData: moodData });
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
@@ -260,15 +267,26 @@ const MoodDetailsScreen = ({ route, navigation }) => {
               </View>
               <View style={styles.buttonContainer}>
                 {isViewMode && (
-                  <TouchableOpacity
-                    style={styles.deleteButton}
-                    onPress={handleDelete}
-                    disabled={isUploading}
-                  >
-                    <Text style={styles.deleteButtonText}>
-                      {isUploading ? 'Processing...' : 'Delete'}
-                    </Text>
-                  </TouchableOpacity>
+                  <View style={styles.actionButtonsContainer}>
+                    <TouchableOpacity
+                      style={styles.deleteButton}
+                      onPress={handleDelete}
+                      disabled={isUploading}
+                    >
+                      <Text style={styles.deleteButtonText}>
+                        {isUploading ? 'Processing...' : 'Delete'}
+                      </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={styles.nextButton}
+                      onPress={navigateToContext}
+                      disabled={isUploading}
+                    >
+                      <Text style={styles.nextButtonText}>
+                        Next
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
                 )}
               </View>
             </View>
@@ -280,7 +298,6 @@ const MoodDetailsScreen = ({ route, navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  // All your existing styles...
   container: {
     flex: 1,
     backgroundColor: '#F7F7F7',
@@ -365,6 +382,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 10,
   },
+  actionButtonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '80%',
+  },
   saveButton: {
     backgroundColor: '#A5EEB8',
     paddingVertical: 10,
@@ -390,9 +412,18 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 20,
-    marginRight: 10,
   },
   deleteButtonText: {
+    fontSize: 16,
+    color: '#333',
+  },
+  nextButton: {
+    backgroundColor: '#A5EEB8',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 20,
+  },
+  nextButtonText: {
     fontSize: 16,
     color: '#333',
   },
