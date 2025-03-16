@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { View, Text, Image, StyleSheet, ActivityIndicator, TouchableOpacity , Modal, Button, TextInput} from 'react-native';
+import { View, Text, Image, StyleSheet, ActivityIndicator, TouchableOpacity, Modal, Button, TextInput } from 'react-native';
 import { PieChart } from 'react-native-chart-kit';
 import { useTheme } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
@@ -18,18 +18,18 @@ interface SleepData {
 }
 interface UserType {
   _id: string;
-    email: string;
-    fullName: string;
-    age: string;
-    gender: string;
-    height: string;
-    weight: string;
-    survay_completed: string;
-    sleepingDisorder: string,
-    sleepingDisorderNote: string,
-    physicalDisability: string,
-    physicalDisabilityNote: string,
-    workEnvironmentImpact: string,
+  email: string;
+  fullName: string;
+  age: string;
+  gender: string;
+  height: string;
+  weight: string;
+  survay_completed: string;
+  sleepingDisorder: string,
+  sleepingDisorderNote: string,
+  physicalDisability: string,
+  physicalDisabilityNote: string,
+  workEnvironmentImpact: string,
 }
 const fetchUserName = async (): Promise<string> => {
   return new Promise((resolve) => {
@@ -39,8 +39,8 @@ const fetchUserName = async (): Promise<string> => {
 
 export default function HomeScreen() {
 
-    const { submitSurvay, submit_survay_state } = useAuthContext()
-  
+  const { submitSurvay, submit_survay_state } = useAuthContext()
+
   const [userName, setUserName] = useState<string>('Loading...');
   const { colors } = useTheme();
   const [sleepData, setSleepData] = useState<SleepData[]>([]);
@@ -178,23 +178,23 @@ export default function HomeScreen() {
     }
   };
 
-  const handleSurveySubmit = async() => {
-    
+  const handleSurveySubmit = async () => {
+
     try {
-      
-      await submitSurvay?.(surveyResponses,user._id);
+
+      await submitSurvay?.(surveyResponses, user._id);
 
     } catch (error) {
-      Toast.show({type:'error',text1:'Failed to submit survay',position:'bottom', swipeable:true})
+      Toast.show({ type: 'error', text1: 'Failed to submit survay', position: 'bottom', swipeable: true })
     }
   };
 
   const fetchUser = async () => {
-      
+
     try {
-      
+
       const userString = await AsyncStorage.getItem('user');
-      
+
       if (userString) {
         const user = JSON.parse(userString);
         setUser(user);
@@ -202,7 +202,7 @@ export default function HomeScreen() {
         if (!user.survay_completed) {
           setShowSurveyModal(true);
         }
-        else{
+        else {
           setShowSurveyModal(false)
         }
 
@@ -222,21 +222,21 @@ export default function HomeScreen() {
         setUserName('Guest');
       }
     };
-    
+
     getUserName();
     fetchUser();
     fetchDummySleepData();
   }, []);
 
   useEffect(() => {
-    
-    if(submit_survay_state && submit_survay_state.success){
+
+    if (submit_survay_state && submit_survay_state.success) {
       fetchUser();
-      Toast.show({type:'success',text1:'Survay completed',position:'bottom', swipeable:true})
+      Toast.show({ type: 'success', text1: 'Survay completed', position: 'bottom', swipeable: true })
     }
 
   }, [submit_survay_state])
-  
+
 
   if (loading) return <ActivityIndicator size="large" color={colors.primary} />;
 
@@ -253,46 +253,46 @@ export default function HomeScreen() {
         <StatBox icon={require('@/assets/images/award1.png')} value="6.2" label="Avg. Sleep Quality" />
         <StatBox icon={require('@/assets/images/clock.png')} value="6.76" label="Avg. Sleep Time" />
         <StatBox icon={require('@/assets/images/cloud.png')} value="ON" label="Cloud Backup" />
-      </View> 
+      </View>
 
-      <StressDash/>
+      <StressDash />
 
       <View style={styles.cont}>
-{/* Sleep Data Chart */}
-<Text style={styles.sectionTitle}>Your Sleep at a Glance</Text>
-      <View style={styles.chartContainer}>
-        <PieChart
-          data={sleepData}
-          width={200}
-          height={180}
-          chartConfig={{
-            backgroundColor: colors.background,
-            color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-          }}
-          accessor="hours"
-          backgroundColor="transparent"
-          paddingLeft="50"
-          hasLegend={false}
-        />
-      </View>
+        {/* Sleep Data Chart */}
+        <Text style={styles.sectionTitle}>Your Sleep at a Glance</Text>
+        <View style={styles.chartContainer}>
+          <PieChart
+            data={sleepData}
+            width={200}
+            height={180}
+            chartConfig={{
+              backgroundColor: colors.background,
+              color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+            }}
+            accessor="hours"
+            backgroundColor="transparent"
+            paddingLeft="50"
+            hasLegend={false}
+          />
+        </View>
 
-      {/* Sleep Summary (Below Pie Chart) */}
-      <View style={styles.legendContainer}>
-        {sleepData.map((item, index) => (
-          <View key={index} style={styles.legendItem}>
-            {/* Color Dot */}
-            <View style={[styles.dot, { backgroundColor: item.color }]} />
-            <View>
-              {/* Sleep Category */}
-              <Text style={styles.legendText}>{item.name}</Text>
-              {/* Hours & Percentage */}
-              <Text style={styles.legendDetails}>
-                {item.hours.toFixed(2)} hours ({((item.hours / totalHours) * 100).toFixed(0)}%)
-              </Text>
+        {/* Sleep Summary (Below Pie Chart) */}
+        <View style={styles.legendContainer}>
+          {sleepData.map((item, index) => (
+            <View key={index} style={styles.legendItem}>
+              {/* Color Dot */}
+              <View style={[styles.dot, { backgroundColor: item.color }]} />
+              <View>
+                {/* Sleep Category */}
+                <Text style={styles.legendText}>{item.name}</Text>
+                {/* Hours & Percentage */}
+                <Text style={styles.legendDetails}>
+                  {item.hours.toFixed(2)} hours ({((item.hours / totalHours) * 100).toFixed(0)}%)
+                </Text>
+              </View>
             </View>
-          </View>
-        ))}
-      </View>
+          ))}
+        </View>
       </View>
 
       <Modal
@@ -315,13 +315,13 @@ export default function HomeScreen() {
               )}
             </View>
             <View style={styles.closeButton}>
-              <Button title="Close" onPress={()=>setShowSurveyModal(false)} />
+              <Button title="Close" onPress={() => setShowSurveyModal(false)} />
             </View>
-            
+
           </View>
         </View>
       </Modal>
-      
+
     </View>
   );
 }
@@ -391,9 +391,9 @@ const styles = StyleSheet.create({
     width: '100%',
     marginTop: 20,
   },
-  closeButton:{
+  closeButton: {
     flexDirection: 'row',
-    justifyContent:'flex-end',
+    justifyContent: 'flex-end',
     width: '100%',
     marginTop: 20,
   },

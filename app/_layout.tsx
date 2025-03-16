@@ -15,6 +15,7 @@ import { createDrawerNavigator } from "@react-navigation/drawer"; // Import Draw
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import SleepRecommendationScreen from "./(tabs)/SleepRecommendationScreen";
 import { useAuthContext } from "@/context/hooks/use-auth-context";
+import { registerSleepTracking } from "@/scripts/sleepTracker";
 
 SplashScreen.preventAutoHideAsync();
 const Drawer = createDrawerNavigator(); // Drawer instance
@@ -50,6 +51,7 @@ export default function RootLayout() {
       setIsReady(true);
       fetchUser();
     }
+    registerSleepTracking();
   }, [loaded]);
 
   return (

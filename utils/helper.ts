@@ -19,7 +19,7 @@ export const predictSleepDuration = (sleepRecords: SleepRecord[]): number[] => {
 
   // Step 4: Predict the next 5 days using the linear regression model
   const predictions = [];
-  for (let i = 5; i < 7; i++) {
+  for (let i = 5; i < 8; i++) {
     let predictedValue = slope * i + intercept;
     predictedValue = Math.abs(Math.round(predictedValue));
     predictions.push(Math.round(predictedValue)); // Round to the nearest integer

@@ -17,7 +17,7 @@ import SettingScreen from "./settings";
 import AboutScreen from "./about";
 import { createStackNavigator } from "@react-navigation/stack";
 import BestBedTimeScreen from "./best_bed_time";
-import ScanMyFaceScreen from "./scan_my_face";
+import MoodTrackerScreen from './scan_my_face';
 import MySleepPredictionsScreen from "./my_sleep_preditions";
 import SleepInterventionScreen from "./sleep_intervention";
 import HelpScreen from "./help";
@@ -27,6 +27,7 @@ import CameraScreen from "./CameraScreen";
 import MoodDetailScreen from "./MoodDetailScreen";
 import MoodHistory from "./MoodHistory";
 import SleepRecordScreen from "./SleepRecordScreen";
+import MoodCamera from "./MoodCamera";
 
 const Drawer = createDrawerNavigator();
 const Tab = createBottomTabNavigator();
@@ -95,7 +96,7 @@ function BottomTabs({ navigation }: any) {
       <Tab.Screen name="Best Bed Time" component={BestBedTimeScreen} />
       <Tab.Screen
         name="Scan My Face"
-        component={ScanMyFaceScreen}
+        component={MoodTrackerScreen}
         options={{ tabBarItemStyle: { display: "none" } }}
       />
       <Tab.Screen
@@ -149,9 +150,24 @@ function BottomTabs({ navigation }: any) {
         component={MoodHistory}
         options={{ tabBarItemStyle: { display: "none" } }}
       />
-    </Tab.Navigator>
+    </Tab.Navigator >
   );
 }
+
+const MoodTrackerStack = () => {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen
+        name="MoodTracker"
+        component={MoodTrackerScreen}
+        options={{ headerTitle: "Scan My Face" }}
+      />
+      <Stack.Screen name="MoodCamera" component={MoodCamera} />
+      <Stack.Screen name="MoodDetailScreen" component={MoodDetailScreen} />
+      <Stack.Screen name="MoodHistory" component={MoodHistory} />
+    </Stack.Navigator>
+  );
+};
 
 function DrawerNavigator() {
   return (
@@ -181,11 +197,8 @@ function DrawerNavigator() {
       />
       <Drawer.Screen
         name="Scan My Face"
-        component={BottomTabs}
-        initialParams={{ screen: "Scan My Face" }}
-        options={{
-          drawerLabel: "Scan My Face",
-        }}
+        component={MoodTrackerStack}
+        options={{ headerShown: false }}
       />
       <Drawer.Screen
         name="My Sleep Predictions"
@@ -242,6 +255,7 @@ function DrawerNavigator() {
         options={{
           drawerLabel: "Help",
         }}
+
       />
     </Drawer.Navigator>
   );
