@@ -18,7 +18,7 @@ const SleepRecordScreen = () => {
       sleepDuration: hoursSlept,
       dailyStepCount: stepCount,
     });
-    if (response.status === 201) {
+    if (response.status === 201 || response.status === 200) {
       Alert.alert("Success", "Record saved successfully");
     } else {
       Alert.alert("Error", "Failed to save record");
@@ -67,6 +67,7 @@ const SleepRecordScreen = () => {
             value={date}
             mode="date"
             display="default"
+            maximumDate={new Date()}
             onChange={(event, selectedDate) => {
               setShowDatePicker(false);
               if (selectedDate) setDate(selectedDate);
