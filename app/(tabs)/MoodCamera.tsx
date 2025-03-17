@@ -20,8 +20,10 @@ export default function MoodCamera() {
   const [currentEmotion, setCurrentEmotion] = useState('Unknown');
   const [isProcessing, setIsProcessing] = useState(false);
   const [faceResults, setFaceResults] = useState<any[]>([]);
+
   const [showDialog, setShowDialog] = useState(false);
   const [capturedFrame, setCapturedFrame] = useState<any>(null);
+
 
   const cameraRef = useRef<CameraView>(null);
   const socketRef = useRef<any>(null);
@@ -50,6 +52,7 @@ export default function MoodCamera() {
       if (data.status === 'success') {
         setFaceResults(data.results || []);
 
+
         // If face detected, set the current emotion and show dialog
         if (data.results && data.results.length > 0) {
           setCurrentEmotion(data.results[0].emotion);
@@ -58,6 +61,7 @@ export default function MoodCamera() {
           if (!isStreaming && !showDialog) {
             handleFaceDetected(data.results[0].emotion);
           }
+
         } else {
           setCurrentEmotion('No face detected');
         }
@@ -73,6 +77,7 @@ export default function MoodCamera() {
         socketRef.current.disconnect();
       }
     };
+
   }, [isStreaming, showDialog]);
 
   const handleFaceDetected = async (emotion: string) => {
@@ -104,6 +109,7 @@ export default function MoodCamera() {
       console.error('Error capturing frame:', error);
     }
   };
+
 
   const stopStreaming = () => {
     setIsStreaming(false);
@@ -224,6 +230,7 @@ export default function MoodCamera() {
     }
   };
 
+
   const handleContinue = async () => {
     if (capturedFrame) {
       setShowDialog(false);
@@ -241,11 +248,13 @@ export default function MoodCamera() {
           mood: capturedFrame.mood,
           processedImageBase64: result.processed_image || null
         });
+
       } catch (error: any) {
         console.error('Failed to process image:', error);
         setError(error.message || 'Error processing image. Please try again.');
       } finally {
         setLoading(false);
+
         setCapturedFrame(null);
       }
     }
@@ -255,6 +264,7 @@ export default function MoodCamera() {
     setShowDialog(false);
     setCapturedFrame(null);
   };
+
 
   return (
     <View style={styles.container}>
@@ -291,14 +301,17 @@ export default function MoodCamera() {
         </View>
 
         <View style={styles.controlsContainer}>
+
           {/* Camera reverse button commented out as requested
           <TouchableOpacity style={styles.controlButton} onPress={toggleCameraFacing}>
             <Ionicons name="camera-reverse" size={32} color="white" />
           </TouchableOpacity> */}
 
+
           <TouchableOpacity
             style={[styles.streamButton, isStreaming ? styles.streamingActive : {}]}
             onPress={toggleStreaming}
+
             disabled={showDialog}
           >
             {/* Icon based start/stop stream button */}
@@ -310,6 +323,7 @@ export default function MoodCamera() {
           </TouchableOpacity>
 
           {/* Capture button commented out as requested
+
           {loading ? (
             <View style={styles.captureButton}>
               <ActivityIndicator size="large" color="#fff" />
@@ -322,7 +336,9 @@ export default function MoodCamera() {
             >
               <View style={styles.captureButtonInner} />
             </TouchableOpacity>
+
           )} */}
+
         </View>
 
         {error && (
@@ -331,6 +347,7 @@ export default function MoodCamera() {
           </View>
         )}
       </CameraView>
+
 
       {/* Face detection dialog */}
       <Modal
@@ -368,6 +385,7 @@ export default function MoodCamera() {
           </View>
         </View>
       </Modal>
+
     </View>
   );
 }
@@ -432,9 +450,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   streamButton: {
+
     width: 70,
     height: 70,
     borderRadius: 35,
+
     backgroundColor: 'rgba(0, 0, 0, 0.6)',
     justifyContent: 'center',
     alignItems: 'center',
@@ -474,6 +494,7 @@ const styles = StyleSheet.create({
     color: 'white',
     textAlign: 'center',
   },
+
   centeredView: {
     flex: 1,
     justifyContent: 'center',
@@ -522,4 +543,5 @@ const styles = StyleSheet.create({
   buttonText: {
     color: 'white',
   },
+
 });

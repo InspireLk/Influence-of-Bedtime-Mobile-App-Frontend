@@ -9,6 +9,7 @@ import { predictSleepDuration } from "@/utils/helper";
 import { useRouter } from "expo-router";
 
 export type SleepRecord = {
+  id?: string;
   date: string;
   sleepDuration: number;
 };
@@ -35,19 +36,22 @@ const SleepPredictionScreen = () => {
         const data = await response.data;
 
         const records: SleepRecord[] = data.map((item: any) => ({
+          id: item.id,
           date: item.date,
           sleepDuration: item.sleepDuration,
         }));
-
         const sortedRecords = records
           .sort(
-            (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-          )
+            (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+          ) // Ascending order
           .slice(0, 5);
 
         setSleepRecords(sortedRecords);
 
-        const lastRecordDate = new Date(sortedRecords[0].date);
+        const lastRecordDate = new Date(
+          sortedRecords[sortedRecords.length - 1].date
+        );
+
         const predictedDatesData = [
           new Date(
             lastRecordDate.setDate(lastRecordDate.getDate() + 1)
@@ -135,7 +139,19 @@ const SleepPredictionScreen = () => {
             }}
             bezier
           />
+          <View style={tw`flex-row justify-center items-center mt-4`}>
+            {/* Blue dot - Recorded Sleep */}
+            <View style={tw`flex-row items-center mr-4`}>
+              <View style={tw`w-4 h-4 rounded-full bg-blue-500 mr-2`} />
+              <Text style={tw`text-sm`}>Recorded Sleep</Text>
+            </View>
 
+            {/* Orange dot - Predicted Sleep */}
+            <View style={tw`flex-row items-center`}>
+              <View style={tw`w-4 h-4 rounded-full bg-orange-500 mr-2`} />
+              <Text style={tw`text-sm`}>Predicted Sleep</Text>
+            </View>
+          </View>
           <View style={tw`mt-5 p-4 bg-gray-100 rounded-lg w-11/12`}>
             <Text style={tw`text-lg font-semibold`}>Sleep Habit Analysis</Text>
             <Text style={tw`text-base mt-2`}>
@@ -153,15 +169,6 @@ const SleepPredictionScreen = () => {
           </View>
 
           <View style={tw`mt-10 w-11/12`}>
-            {/* <Button
-              title="View Detailed Analysis"
-              onPress={() =>
-                router.push({
-                  pathname: "/(tabs)/SleepRecommendationScreen",
-                  params: { sleepQualityColor: sleepQuality.color },
-                })
-              }
-            /> */}
             <TouchableOpacity
               style={tw`bg-blue-500 rounded-lg py-3`}
               onPress={() =>

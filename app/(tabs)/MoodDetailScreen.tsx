@@ -196,12 +196,14 @@ const MoodDetailsScreen = ({ route, navigation }) => {
     );
   };
 
+
   // Handle navigation to the context page
   const navigateToContext = () => {
     if (moodData) {
       navigation.navigate('MoodIntevention', { moodData: moodData });
     }
   };
+
 
   return (
     <SafeAreaView style={styles.container}>
@@ -267,6 +269,7 @@ const MoodDetailsScreen = ({ route, navigation }) => {
               </View>
               <View style={styles.buttonContainer}>
                 {isViewMode && (
+
                   <View style={styles.actionButtonsContainer}>
                     <TouchableOpacity
                       style={styles.deleteButton}
@@ -287,6 +290,7 @@ const MoodDetailsScreen = ({ route, navigation }) => {
                       </Text>
                     </TouchableOpacity>
                   </View>
+
                 )}
               </View>
             </View>
@@ -298,6 +302,7 @@ const MoodDetailsScreen = ({ route, navigation }) => {
 };
 
 const styles = StyleSheet.create({
+
   container: {
     flex: 1,
     backgroundColor: '#F7F7F7',
@@ -382,11 +387,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 10,
   },
+
   actionButtonsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     width: '80%',
   },
+
   saveButton: {
     backgroundColor: '#A5EEB8',
     paddingVertical: 10,
@@ -412,11 +419,13 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 20,
+
   },
   deleteButtonText: {
     fontSize: 16,
     color: '#333',
   },
+
   nextButton: {
     backgroundColor: '#A5EEB8',
     paddingVertical: 10,
@@ -427,6 +436,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#333',
   },
+
   disabledButton: {
     backgroundColor: '#cccccc',
     opacity: 0.7,

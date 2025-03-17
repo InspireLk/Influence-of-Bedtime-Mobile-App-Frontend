@@ -47,5 +47,11 @@ export const endpoints = {
   sleepPrediction: {
     addRecord: "/api/sleep/addRecord",
     getAllRecords: "/api/sleep/getRecords",
+    deleteRecord: "/api/sleep/delete",
+    updateRecord: "/api/sleep/update",
+  },
+  sleepIntervention: {
+    save: "/api/intervention/save",
+    findByUserId: "/api/intervention/findByUserId",
   },
 };
