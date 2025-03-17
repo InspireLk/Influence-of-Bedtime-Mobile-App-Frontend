@@ -37,11 +37,13 @@ export const fetcher = async (args) => {
 
 export const endpoints = {
   auth: {
-    sign_in: "/api/auth/sign_in",
-    sign_up: "/api/auth/sign_up",
-    me: "/api/auth/me",
+    sign_in: '/api/auth/sign_in',
+    sign_up: '/api/auth/sign_up',
+    me: '/api/auth/me'
   },
-  user: {
+  user:{
+    submit_survay: '/api/user/submit_survay',
+    predict_bedtime: '/api/user/predict_bedtime',
     submit_survay: "/api/user/submit_survay",
   },
   sleepPrediction: {

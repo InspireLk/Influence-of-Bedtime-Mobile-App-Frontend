@@ -18,7 +18,7 @@ export default function RegisterScreen() {
   const [age, setAge] = useState('20');
   const [occupation, setOccupation] = useState('SE');
   const [gender, setGender] = useState('Male');
-  const [height, setHeight] = useState('5.5');
+  const [height, setHeight] = useState('160');
   const [weight, setWeight] = useState('65');
   const [password, setPassword] = useState('sahan');
   const [confirmPassword, setConfirmPassword] = useState('sahan');
