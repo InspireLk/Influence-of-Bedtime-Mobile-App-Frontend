@@ -11,6 +11,7 @@ import { createDrawerNavigator } from '@react-navigation/drawer'; // Import Draw
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import SleepRecommendationScreen from './(tabs)/SleepRecommendationScreen';
 import { useAuthContext } from '@/context/hooks/use-auth-context';
+import { PermissionsAndroid, Platform, } from 'react-native';
 
 SplashScreen.preventAutoHideAsync()
 const Drawer = createDrawerNavigator(); // Drawer instance
@@ -23,8 +24,34 @@ export default function RootLayout() {
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
   const [user, setUser] = useState<any>(null);
+  const [usagePermissionGranted, setUsagePermissionGranted] = useState(false);
 
   const router = useRouter();
+
+  const requestUsageStatsPermission = async () => {
+  
+    try {
+      const granted = await PermissionsAndroid.request(
+        'android.permission.READ_PHONE_STATE' as any, 
+        {
+          title: 'Usage Stats Permission',
+          message: 'This app needs access to your usage stats to calculate screen time.',
+          buttonNeutral: 'Ask Me Later',
+          buttonNegative: 'Cancel',
+          buttonPositive: 'OK',
+        }
+      );
+  
+      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+          Toast.show({type:'success',text1:'Usage stats permission granted',position:'bottom', swipeable:true})
+          setUsagePermissionGranted(true);
+      } else {
+        console.log('Usage stats permission denied');
+      }
+    } catch (err) {
+      console.error('Error requesting usage stats permission:', err);
+    }
+  };
 
   const fetchUser = async () => {
       
@@ -43,6 +70,11 @@ export default function RootLayout() {
       console.error('Error fetching user:', error);
     }
   };
+
+  // useEffect(() => {
+  //   requestUsageStatsPermission()
+  // }, [])
+  
 
   useEffect(() => {
     

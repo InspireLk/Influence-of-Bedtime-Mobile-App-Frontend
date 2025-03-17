@@ -10,6 +10,8 @@ export interface AuthContextType {
   sign_up?: (userObject: any) => Promise<void>;
   submit_survay_state:  any;
   submitSurvay?:(survayObject: any, _id:string) => Promise<void>;
+  get_bedtime_predict_data?: (_id: string, stepCount:any) => Promise<void>;
+  bedtime_predicted_data:any
   
 }
 

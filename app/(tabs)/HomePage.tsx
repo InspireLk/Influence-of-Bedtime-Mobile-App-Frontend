@@ -54,9 +54,22 @@ export default function HomeScreen() {
     physicalDisability: null,
     physicalDisabilityNote: '',
     workEnvironmentImpact: null,
+    wakeup_time: {
+      Monday: '',
+      Tuesday: '',
+      Wednesday: '',
+      Thursday: '',
+      Friday: '',
+      Saturday: '',
+      Sunday: ''
+    },
   });
 
   const [user, setUser] = useState<any>(null);
+
+  const [showTimePicker, setShowTimePicker] = useState(false);
+  const [selectedDay, setSelectedDay] = useState<any>(null); 
+  const [selectedTime, setSelectedTime] = useState<any>(null);
 
   const fetchDummySleepData = async () => {
     try {
@@ -75,7 +88,7 @@ export default function HomeScreen() {
   };
 
   const handleNextQuestion = () => {
-    if (currentQuestion < 2) {
+    if (currentQuestion < 3) {
       setCurrentQuestion(currentQuestion + 1);
     }
   };
@@ -86,8 +99,48 @@ export default function HomeScreen() {
     }
   };
 
-  const handleResponseChange = (question: string, value: any) => {
-    setSurveyResponses({ ...surveyResponses, [question]: value });
+  // const handleResponseChange = (question: string, value: any) => {
+  //   if (question === 'wakeup_time') {
+  //     setSurveyResponses({
+  //       ...surveyResponses,
+  //       wakeup_time: {
+  //         ...surveyResponses.wakeup_time,
+  //         [value.day]: value.time,
+  //       },
+  //     });
+  //   }
+  //   else{
+  //     setSurveyResponses({ ...surveyResponses, [question]: value });
+  //   }
+  // };
+
+  const handleResponseChange = (key:any, value:any) => {
+    if (key === 'wakeup_time') {
+      setSurveyResponses((prev:any) => ({
+        ...prev,
+        wakeup_time: {
+          ...prev.wakeup_time, 
+          [value.day]: value.time, 
+        }
+      }));
+    } else {
+      setSurveyResponses((prev:any) => ({
+        ...prev,
+        [key]: value
+      }));
+    }
+  };
+  
+  
+  
+
+  const handleTimeChange = (event:any, selectedDate:any) => {
+    if (selectedDate) {
+      const time = selectedDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      handleResponseChange('wakeup_time', { day: selectedDay, time });
+      setSelectedTime(time);
+    }
+    setShowTimePicker(false);
   };
 
   const renderQuestion = () => {
@@ -95,7 +148,7 @@ export default function HomeScreen() {
       case 0:
         return (
           <View>
-            <Text style={styles.modalTitle}>Question 1/3</Text>
+            <Text style={styles.modalTitle}>Question 1/4</Text>
             <Text style={styles.modalText}>Are you suffering any sleeping disorders?</Text>
             <View style={styles.radioContainer}>
               <TouchableOpacity
@@ -128,7 +181,7 @@ export default function HomeScreen() {
       case 1:
         return (
           <View>
-            <Text style={styles.modalTitle}>Question 2/3</Text>
+            <Text style={styles.modalTitle}>Question 2/4</Text>
             <Text style={styles.modalText}>Are you having any physical disabilities?</Text>
             <View style={styles.radioContainer}>
               <TouchableOpacity
@@ -161,7 +214,7 @@ export default function HomeScreen() {
       case 2:
         return (
           <View>
-            <Text style={styles.modalTitle}>Question 3/3</Text>
+            <Text style={styles.modalTitle}>Question 3/4</Text>
             <Text style={styles.modalText}>How is your working environment affecting your mental health?</Text>
             <Text style={styles.modalText}>Rate 1-10 (1 for very low, 10 for too high)</Text>
             <TextInput
@@ -173,6 +226,31 @@ export default function HomeScreen() {
             />
           </View>
         );
+        case 3:
+          return (
+            <View>
+              <Text style={styles.modalTitle}>Question 4/4</Text>
+              <Text style={styles.modalText}>Please provide your wake-up times for the following days of the week:</Text>
+
+              {/* Container for days of the week */}
+              <View style={styles.wakeUpTimeRowContainer}>
+                {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day, index) => (
+                  <View key={index} style={styles.dayContainer}>
+                    <Text style={styles.dayText}>{day}</Text>
+                    <TextInput
+                      style={styles.input}
+                      placeholder="Time"
+                      value={surveyResponses.wakeup_time[day] || ''}
+                      onChangeText={(text) => handleResponseChange('wakeup_time', { day, time: text })}
+                    />
+                  </View>
+                ))}
+              </View>
+
+            </View>
+          );
+
+        
       default:
         return null;
     }
@@ -308,7 +386,7 @@ export default function HomeScreen() {
               {currentQuestion > 0 && (
                 <Button title="Previous" onPress={handlePreviousQuestion} />
               )}
-              {currentQuestion < 2 ? (
+              {currentQuestion < 3 ? (
                 <Button title="Next" onPress={handleNextQuestion} />
               ) : (
                 <Button title="Submit" onPress={handleSurveySubmit} />
@@ -444,5 +522,25 @@ const styles = StyleSheet.create({
   },
   radioText: {
     fontSize: 16,
+  },
+  wakeUpTimeRowContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    marginVertical: 10,
+  },
+  dayContainer: {
+    alignItems: 'center',
+    marginHorizontal: 5,
+    marginVertical: 5,
+  },
+  dayText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 5,
+  },
+  timeText: {
+    fontSize: 16,
+    color: '#333',
   },
 });

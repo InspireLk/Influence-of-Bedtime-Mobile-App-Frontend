@@ -39,7 +39,8 @@ export const endpoints = {
     me: '/api/auth/me'
   },
   user:{
-    submit_survay: '/api/user/submit_survay'
+    submit_survay: '/api/user/submit_survay',
+    predict_bedtime: '/api/user/predict_bedtime'
   }
   
 };
