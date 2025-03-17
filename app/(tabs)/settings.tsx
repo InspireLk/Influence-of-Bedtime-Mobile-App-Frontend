@@ -1,42 +1,88 @@
-import { StyleSheet, Image, Platform } from 'react-native';
+import React from "react";
+import { View, Text, Switch, TouchableOpacity, ScrollView } from "react-native";
+import tw from "twrnc";
+import { useState } from "react";
+import { Feather } from "@expo/vector-icons"; // For icons
 
-import { Collapsible } from '@/components/Collapsible';
-import { ExternalLink } from '@/components/ExternalLink';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-import { IconSymbol } from '@/components/ui/IconSymbol';
+const SettingScreen = () => {
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [darkMode, setDarkMode] = useState(false);
 
-export default function SettingScreen() {
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-      headerImage={
-        <IconSymbol
-          size={310}
-          color="#808080"
-          name="chevron.left.forwardslash.chevron.right"
-          style={styles.headerImage}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Settings</ThemedText>
-      </ThemedView>
-      <ThemedText>This app includes example code to help you get started.</ThemedText>
-      
-    </ParallaxScrollView>
-  );
-}
+    <ScrollView style={tw`flex-1 bg-gray-100`}>
+      {/* Header */}
+      <View style={tw`bg-white p-4 border-b border-gray-300`}>
+        <Text style={tw`text-xl font-bold text-gray-800`}>Settings</Text>
+      </View>
 
-const styles = StyleSheet.create({
-  headerImage: {
-    color: '#808080',
-    bottom: -90,
-    left: -35,
-    position: 'absolute',
-  },
-  titleContainer: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-});
+      {/* General Section */}
+      <View style={tw`bg-white p-4 mt-4`}>
+        <Text style={tw`text-gray-500 uppercase text-xs mb-3`}>General</Text>
+        <TouchableOpacity
+          style={tw`flex-row justify-between items-center py-3 border-b border-gray-200`}
+        >
+          <Text style={tw`text-base text-gray-700`}>Account</Text>
+          <Feather name="chevron-right" size={20} color="gray" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={tw`flex-row justify-between items-center py-3 border-b border-gray-200`}
+        >
+          <Text style={tw`text-base text-gray-700`}>Privacy</Text>
+          <Feather name="chevron-right" size={20} color="gray" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={tw`flex-row justify-between items-center py-3`}
+        >
+          <Text style={tw`text-base text-gray-700`}>Security</Text>
+          <Feather name="chevron-right" size={20} color="gray" />
+        </TouchableOpacity>
+      </View>
+
+      {/* Preferences Section */}
+      <View style={tw`bg-white p-4 mt-4`}>
+        <Text style={tw`text-gray-500 uppercase text-xs mb-3`}>
+          Preferences
+        </Text>
+        <View
+          style={tw`flex-row justify-between items-center py-3 border-b border-gray-200`}
+        >
+          <Text style={tw`text-base text-gray-700`}>Notifications</Text>
+          <Switch
+            value={notificationsEnabled}
+            onValueChange={setNotificationsEnabled}
+          />
+        </View>
+        <View style={tw`flex-row justify-between items-center py-3`}>
+          <Text style={tw`text-base text-gray-700`}>Dark Mode</Text>
+          <Switch value={darkMode} onValueChange={setDarkMode} />
+        </View>
+      </View>
+
+      {/* About Section */}
+      <View style={tw`bg-white p-4 mt-4`}>
+        <Text style={tw`text-gray-500 uppercase text-xs mb-3`}>About</Text>
+        <TouchableOpacity
+          style={tw`flex-row justify-between items-center py-3 border-b border-gray-200`}
+        >
+          <Text style={tw`text-base text-gray-700`}>Help & Support</Text>
+          <Feather name="chevron-right" size={20} color="gray" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={tw`flex-row justify-between items-center py-3`}
+        >
+          <Text style={tw`text-base text-gray-700`}>App Version</Text>
+          <Text style={tw`text-gray-500`}>1.0.0</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Logout Button */}
+      <View style={tw`p-4 mt-6`}>
+        <TouchableOpacity style={tw`bg-red-500 py-3 rounded-lg items-center`}>
+          <Text style={tw`text-white font-bold text-base`}>Log Out</Text>
+        </TouchableOpacity>
+      </View>
+    </ScrollView>
+  );
+};
+
+export default SettingScreen;

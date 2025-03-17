@@ -1,94 +1,170 @@
+import axios, { endpoints } from "@/utils/axios";
+import { useFocusEffect } from "expo-router";
 import React, { useState, useEffect } from "react";
-import { StyleSheet, View, Text, Image } from "react-native";
+import {
+  StyleSheet,
+  View,
+  Text,
+  Image,
+  Modal,
+  TextInput,
+  Button,
+  TouchableOpacity,
+} from "react-native";
 import { Calendar } from "react-native-calendars";
+import { SleepRecord } from "./SleepPredictionScreen";
 
-// Dummy data simulating recorded sleep dates
-const recordedSleepData = [
-  "2025-02-01",
-  "2025-02-02",
-  "2025-02-04",
-  "2025-02-07",
-  "2025-02-08",
-  "2025-02-10",
-  "2025-02-11",
-  "2025-02-12",
-  "2025-02-14",
-  "2025-02-15",
-  "2025-02-16",
-  "2025-02-17",
-  "2025-02-18",
-  "2025-02-19",
-  "2025-02-20",
-  "2025-02-21",
-  "2025-02-22",
-];
-
-// Function to mark dates in the calendar
-const getMarkedDates = (dates: string[]) => {
+const getMarkedDates = (records: SleepRecord[]) => {
   let markedDates: { [date: string]: any } = {};
-  dates.forEach((date) => {
-    markedDates[date] = {
-      selected: true,
-      selectedColor: "#fbc02d", // Yellow for recorded sleep
-    };
+  records.forEach(({ date }) => {
+    markedDates[date] = { selected: true, selectedColor: "#fbc02d" };
   });
   return markedDates;
 };
 
+export default function SleepTracker() {
+  const [sleepRecords, setSleepRecords] = useState<SleepRecord[]>([]);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [sleepDuration, setSleepDuration] = useState<string>("");
+  const [selectedRecordId, setSelectedRecordId] = useState<string | null>(null);
+  const today = new Date().toISOString().split("T")[0];
 
+  useFocusEffect(
+    React.useCallback(() => {
+      const fetchSleepRecords = async () => {
+        try {
+          const response = await axios.get(
+            endpoints.sleepPrediction.getAllRecords
+          );
+          const records: SleepRecord[] = response.data.map((item: any) => ({
+            id: item._id, // Using MongoDB _id
+            date: item.date.split("T")[0],
+            sleepDuration: item.sleepDuration,
+          }));
+          setSleepRecords(records);
+        } catch (error) {
+          console.error("Error fetching sleep records", error);
+        }
+      };
 
-// Function to count how many times sleep has been recorded this month
-const getCurrentMonthSleepCount = (dates: string[]): number => {
-  const today = new Date();
-  const currentMonth = today.getMonth(); // 0-11 (January = 0)
-  const currentYear = today.getFullYear();
+      fetchSleepRecords();
+    }, [])
+  );
 
-  // Filter dates that belong to the current month and year
-  const filteredDates = dates.filter(date => {
-    const recordedDate = new Date(date);
-    return recordedDate.getMonth() === currentMonth && recordedDate.getFullYear() === currentYear;
-  });
+  const handleDayPress = (day: { dateString: string }) => {
+    if (day.dateString > today) return; // Prevent selecting future dates
 
-  return filteredDates.length; // Return the count of sleep records for this month
-};
+    setSelectedDate(day.dateString);
+    const record = sleepRecords.find((r) => r.date === day.dateString);
+    setSleepDuration(record ? String(record.sleepDuration) : "");
+    if (record?.id) setSelectedRecordId(record.id);
 
-export default function StakeSociety() {
-  const [streak, setStreak] = useState<number>(0);
-  const [sleepCount, setSleepCount] = useState<number>(0);
+    setModalVisible(true);
+  };
 
-  useEffect(() => {
-    setSleepCount(getCurrentMonthSleepCount(recordedSleepData));
-  }, []);
+  const handleUpdate = async () => {
+    if (!selectedDate) return;
+
+    try {
+      if (selectedRecordId) {
+        // Update existing record using ID
+        await axios.put(
+          `${endpoints.sleepPrediction.updateRecord}/${selectedRecordId}`,
+          {
+            sleepDuration: Number(sleepDuration),
+          }
+        );
+      } else {
+        // Create new record
+        const response = await axios.post(endpoints.sleepPrediction.addRecord, {
+          date: selectedDate,
+          sleepDuration: Number(sleepDuration),
+        });
+
+        setSleepRecords([
+          ...sleepRecords,
+          {
+            id: response.data._id,
+            date: selectedDate,
+            sleepDuration: Number(sleepDuration),
+          },
+        ]);
+      }
+
+      setModalVisible(false);
+    } catch (error) {
+      console.error("Error updating record", error);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!selectedRecordId) return;
+
+    try {
+      await axios.delete(
+        `${endpoints.sleepPrediction.deleteRecord}/${selectedRecordId}`
+      );
+      setSleepRecords(sleepRecords.filter((r) => r.id !== selectedRecordId));
+      setModalVisible(false);
+    } catch (error) {
+      console.error("Error deleting record", error);
+    }
+  };
 
   return (
     <View style={styles.container}>
-      {/* Streak Display */}
-      <Image source={require('@/assets/images/fire.png')} style={styles.icon} />
-      <Text style={styles.title}>You are going strong for</Text>
-      <Text style={styles.streakText}>{sleepCount} days</Text>
-      <Text style={styles.subtitle}>Record a sleep not to lose your streak</Text>
+      <Image source={require("@/assets/images/fire.png")} style={styles.icon} />
+      <Text style={styles.title}>Sleep Tracker</Text>
 
+      <Calendar
+        markedDates={getMarkedDates(sleepRecords)}
+        onDayPress={handleDayPress}
+        style={{
+          width: 350,
+          height: 350,
+          borderRadius: 10,
+          padding: 50,
+          backgroundColor: "white",
+        }}
+        theme={{
+          todayTextColor: "#ff5722",
+          arrowColor: "#ff5722",
+          textDayFontSize: 16,
+          textMonthFontSize: 18,
+          textDayHeaderFontSize: 14,
+        }}
+      />
 
+      {/* MODAL */}
+      <Modal visible={modalVisible} animationType="slide" transparent>
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>
+              Sleep Duration ({selectedDate})
+            </Text>
 
-      {/* Calendar */}
-      <Calendar 
-  markedDates={getMarkedDates(recordedSleepData)}
-  style={{
-    width: 350,  // Adjust width
-    height: 350, // Adjust height
-    borderRadius: 10, // Optional: rounded corners
-    padding: 50, // Add padding inside
-    backgroundColor: "white", // Background color
-  }}
-  theme={{
-    todayTextColor: "#ff5722",
-    arrowColor: "#ff5722",
-    textDayFontSize: 16,  // Resize day numbers
-    textMonthFontSize: 18, // Resize month title
-    textDayHeaderFontSize: 14, // Resize day names (Mon, Tue, etc.)
-  }}
-/>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter sleep duration (hrs)"
+              keyboardType="numeric"
+              value={sleepDuration}
+              onChangeText={setSleepDuration}
+            />
 
+            <View style={styles.buttonRow}>
+              <Button title="Update" onPress={handleUpdate} color="#4CAF50" />
+              {selectedRecordId && (
+                <Button title="Delete" onPress={handleDelete} color="#F44336" />
+              )}
+            </View>
+
+            <TouchableOpacity onPress={() => setModalVisible(false)}>
+              <Text style={styles.closeText}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -110,22 +186,41 @@ const styles = StyleSheet.create({
     fontSize: 30,
     fontWeight: "500",
   },
-  streakText: {
-    fontSize: 30,
-    fontWeight: "bold",
-    color: "#ff9800",
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
   },
-  subtitle: {
-    fontSize: 14,
-    marginTop: 15,
-    color: "#666",
+  modalContent: {
+    width: 300,
+    padding: 20,
+    backgroundColor: "white",
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
     marginBottom: 10,
   },
-  sleepCountText: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#4CAF50",
+  input: {
+    width: "100%",
+    borderWidth: 1,
+    borderColor: "#ddd",
+    padding: 10,
+    borderRadius: 5,
+    marginBottom: 10,
+    textAlign: "center",
+  },
+  buttonRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+  },
+  closeText: {
     marginTop: 10,
+    color: "#ff5722",
+    fontWeight: "bold",
   },
 });
-

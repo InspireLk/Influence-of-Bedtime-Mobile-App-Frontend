@@ -1,19 +1,24 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
-import { SplashScreen, Stack, useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
-import 'react-native-reanimated';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { AuthProvider } from '../context/auth/index';
-import Toast  from 'react-native-toast-message';
-import LoadingScreen from '@/components/LoadingScreen';
-import { createDrawerNavigator } from '@react-navigation/drawer'; // Import Drawer
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import SleepRecommendationScreen from './(tabs)/SleepRecommendationScreen';
-import { useAuthContext } from '@/context/hooks/use-auth-context';
+import {
+  DarkTheme,
+  DefaultTheme,
+  ThemeProvider,
+} from "@react-navigation/native";
+import { useFonts } from "expo-font";
+import { SplashScreen, Stack, useRouter } from "expo-router";
+import { useEffect, useState } from "react";
+import "react-native-reanimated";
+import { useColorScheme } from "@/hooks/useColorScheme";
+import { AuthProvider } from "../context/auth/index";
+import Toast from "react-native-toast-message";
+import LoadingScreen from "@/components/LoadingScreen";
+import { createDrawerNavigator } from "@react-navigation/drawer"; // Import Drawer
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import SleepRecommendationScreen from "./(tabs)/SleepRecommendationScreen";
+import { useAuthContext } from "@/context/hooks/use-auth-context";
+import { registerSleepTracking } from "@/scripts/sleepTracker";
 import { PermissionsAndroid, Platform, } from 'react-native';
 
-SplashScreen.preventAutoHideAsync()
+SplashScreen.preventAutoHideAsync();
 const Drawer = createDrawerNavigator(); // Drawer instance
 
 export default function RootLayout() {
@@ -21,7 +26,7 @@ export default function RootLayout() {
   const colorScheme = useColorScheme();
   const [isReady, setIsReady] = useState(false);
   const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
+    SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
   });
   const [user, setUser] = useState<any>(null);
   const [usagePermissionGranted, setUsagePermissionGranted] = useState(false);
@@ -83,6 +88,7 @@ export default function RootLayout() {
       setIsReady(true);
       fetchUser();
     }
+    registerSleepTracking();
   }, [loaded]);
 
   return (
@@ -114,14 +120,14 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ isReady, router, colorScheme })
         router.replace('/(auth)');
       }
     }
-  }, [isReady, user,loading,router]);
+  }, [isReady, user, loading, router]);
 
   if (!isReady && loading) {
-    return <LoadingScreen/>
+    return <LoadingScreen />;
   }
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <Stack>
         <Stack.Screen name='(auth)' options={{headerTitle:"AUthentication", headerTitleAlign:'center'}}/>
         <Stack.Screen name="(tabs)" options={{ headerShown:false}}/>

@@ -108,6 +108,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     const initialize = useCallback(async () => {
         
+        
         dispatch({
             type:'START_LOADING',
             payload:{

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { View, Text, Image, StyleSheet, ActivityIndicator, TouchableOpacity , Modal, Button, TextInput} from 'react-native';
+import { View, Text, Image, StyleSheet, ActivityIndicator, TouchableOpacity, Modal, Button, TextInput } from 'react-native';
 import { PieChart } from 'react-native-chart-kit';
 import { useTheme } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
@@ -18,18 +18,18 @@ interface SleepData {
 }
 interface UserType {
   _id: string;
-    email: string;
-    fullName: string;
-    age: string;
-    gender: string;
-    height: string;
-    weight: string;
-    survay_completed: string;
-    sleepingDisorder: string,
-    sleepingDisorderNote: string,
-    physicalDisability: string,
-    physicalDisabilityNote: string,
-    workEnvironmentImpact: string,
+  email: string;
+  fullName: string;
+  age: string;
+  gender: string;
+  height: string;
+  weight: string;
+  survay_completed: string;
+  sleepingDisorder: string,
+  sleepingDisorderNote: string,
+  physicalDisability: string,
+  physicalDisabilityNote: string,
+  workEnvironmentImpact: string,
 }
 const fetchUserName = async (): Promise<string> => {
   return new Promise((resolve) => {
@@ -331,46 +331,46 @@ export default function HomeScreen() {
         <StatBox icon={require('@/assets/images/award1.png')} value="6.2" label="Avg. Sleep Quality" />
         <StatBox icon={require('@/assets/images/clock.png')} value="6.76" label="Avg. Sleep Time" />
         <StatBox icon={require('@/assets/images/cloud.png')} value="ON" label="Cloud Backup" />
-      </View> 
+      </View>
 
-      <StressDash/>
+      <StressDash />
 
       <View style={styles.cont}>
-{/* Sleep Data Chart */}
-<Text style={styles.sectionTitle}>Your Sleep at a Glance</Text>
-      <View style={styles.chartContainer}>
-        <PieChart
-          data={sleepData}
-          width={200}
-          height={180}
-          chartConfig={{
-            backgroundColor: colors.background,
-            color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-          }}
-          accessor="hours"
-          backgroundColor="transparent"
-          paddingLeft="50"
-          hasLegend={false}
-        />
-      </View>
+        {/* Sleep Data Chart */}
+        <Text style={styles.sectionTitle}>Your Sleep at a Glance</Text>
+        <View style={styles.chartContainer}>
+          <PieChart
+            data={sleepData}
+            width={200}
+            height={180}
+            chartConfig={{
+              backgroundColor: colors.background,
+              color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+            }}
+            accessor="hours"
+            backgroundColor="transparent"
+            paddingLeft="50"
+            hasLegend={false}
+          />
+        </View>
 
-      {/* Sleep Summary (Below Pie Chart) */}
-      <View style={styles.legendContainer}>
-        {sleepData.map((item, index) => (
-          <View key={index} style={styles.legendItem}>
-            {/* Color Dot */}
-            <View style={[styles.dot, { backgroundColor: item.color }]} />
-            <View>
-              {/* Sleep Category */}
-              <Text style={styles.legendText}>{item.name}</Text>
-              {/* Hours & Percentage */}
-              <Text style={styles.legendDetails}>
-                {item.hours.toFixed(2)} hours ({((item.hours / totalHours) * 100).toFixed(0)}%)
-              </Text>
+        {/* Sleep Summary (Below Pie Chart) */}
+        <View style={styles.legendContainer}>
+          {sleepData.map((item, index) => (
+            <View key={index} style={styles.legendItem}>
+              {/* Color Dot */}
+              <View style={[styles.dot, { backgroundColor: item.color }]} />
+              <View>
+                {/* Sleep Category */}
+                <Text style={styles.legendText}>{item.name}</Text>
+                {/* Hours & Percentage */}
+                <Text style={styles.legendDetails}>
+                  {item.hours.toFixed(2)} hours ({((item.hours / totalHours) * 100).toFixed(0)}%)
+                </Text>
+              </View>
             </View>
-          </View>
-        ))}
-      </View>
+          ))}
+        </View>
       </View>
 
       <Modal
