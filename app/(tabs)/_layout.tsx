@@ -28,6 +28,8 @@ import MoodDetailScreen from "./MoodDetailScreen";
 import MoodHistory from "./MoodHistory";
 import SleepRecordScreen from "./SleepRecordScreen";
 import MoodCamera from "./MoodCamera";
+import MoodIntevention from "./MoodIntevention";
+
 
 const Drawer = createDrawerNavigator();
 const Tab = createBottomTabNavigator();
@@ -165,6 +167,9 @@ const MoodTrackerStack = () => {
       <Stack.Screen name="MoodCamera" component={MoodCamera} />
       <Stack.Screen name="MoodDetailScreen" component={MoodDetailScreen} />
       <Stack.Screen name="MoodHistory" component={MoodHistory} />
+      <Stack.Screen name="MoodIntevention" component={MoodIntevention} />
+
+
     </Stack.Navigator>
   );
 };
