@@ -1,5 +1,5 @@
 import { Tabs } from "expo-router";
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { Platform } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { HapticTab } from "@/components/HapticTab";
@@ -29,11 +29,15 @@ import MoodHistory from "./MoodHistory";
 import SleepRecordScreen from "./SleepRecordScreen";
 import MoodCamera from "./MoodCamera";
 import MoodIntevention from "./MoodIntevention";
+import { useAuthContext } from "@/context/hooks/use-auth-context";
+import { useRouter } from "expo-router";
 
 
 const Drawer = createDrawerNavigator();
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
+
+
 
 const getIconName = (routeName: string): keyof typeof Ionicons.glyphMap => {
   switch (routeName) {
@@ -268,10 +272,17 @@ function DrawerNavigator() {
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+  const router = useRouter();
 
-  return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="Main" component={DrawerNavigator} />
-    </Stack.Navigator>
-  );
+  
+
+  const {user} = useAuthContext()
+
+
+    return (
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="Main" component={DrawerNavigator} />
+        </Stack.Navigator>
+      );
+
 }

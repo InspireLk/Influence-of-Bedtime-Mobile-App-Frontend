@@ -1,12 +1,35 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { View, Text, Switch, TouchableOpacity, ScrollView } from "react-native";
 import tw from "twrnc";
 import { useState } from "react";
 import { Feather } from "@expo/vector-icons"; // For icons
+import { useAuthContext } from "@/context/hooks/use-auth-context";
+import { useRouter } from "expo-router";
 
 const SettingScreen = () => {
+
+  const { sign_out, user } = useAuthContext();
+  const router = useRouter();
+
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
+
+  const logout  = async() =>{
+
+    try {
+       sign_out?.()
+    } catch (error) {
+      console.log('==============Error Sign out======================');
+      console.log(error)
+    }
+  }
+
+  useEffect(() => {
+     if(!user){
+      router.replace('/(auth)');
+     }
+  }, [user])
+  
 
   return (
     <ScrollView style={tw`flex-1 bg-gray-100`}>
@@ -77,7 +100,7 @@ const SettingScreen = () => {
 
       {/* Logout Button */}
       <View style={tw`p-4 mt-6`}>
-        <TouchableOpacity style={tw`bg-red-500 py-3 rounded-lg items-center`}>
+        <TouchableOpacity style={tw`bg-red-500 py-3 rounded-lg items-center`} onPress={logout}>
           <Text style={tw`text-white font-bold text-base`}>Log Out</Text>
         </TouchableOpacity>
       </View>

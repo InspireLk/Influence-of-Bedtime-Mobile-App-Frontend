@@ -8,7 +8,11 @@ import StressDash from '@/components/StressDash';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuthContext } from '@/context/hooks';
 import Toast from 'react-native-toast-message';
-
+import React from 'react';
+import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
+import RNDateTimePicker from '@react-native-community/datetimepicker';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
 interface SleepData {
   name: string;
   hours: number;
@@ -69,7 +73,9 @@ export default function HomeScreen() {
 
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [selectedDay, setSelectedDay] = useState<any>(null); 
-  const [selectedTime, setSelectedTime] = useState<any>(null);
+  const [selectedTime, setSelectedTime] = useState<any>([]);
+
+  const [pickerVisible, setPickerVisible] = useState<{ [key: string]: boolean }>({});
 
   const fetchDummySleepData = async () => {
     try {
@@ -99,21 +105,6 @@ export default function HomeScreen() {
     }
   };
 
-  // const handleResponseChange = (question: string, value: any) => {
-  //   if (question === 'wakeup_time') {
-  //     setSurveyResponses({
-  //       ...surveyResponses,
-  //       wakeup_time: {
-  //         ...surveyResponses.wakeup_time,
-  //         [value.day]: value.time,
-  //       },
-  //     });
-  //   }
-  //   else{
-  //     setSurveyResponses({ ...surveyResponses, [question]: value });
-  //   }
-  // };
-
   const handleResponseChange = (key:any, value:any) => {
     if (key === 'wakeup_time') {
       setSurveyResponses((prev:any) => ({
@@ -130,19 +121,20 @@ export default function HomeScreen() {
       }));
     }
   };
-  
-  
-  
 
-  const handleTimeChange = (event:any, selectedDate:any) => {
-    if (selectedDate) {
-      const time = selectedDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      handleResponseChange('wakeup_time', { day: selectedDay, time });
-      setSelectedTime(time);
-    }
-    setShowTimePicker(false);
+  const handleTimeChange = (day: string, time: Date) => {
+    const formattedTime = time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    handleResponseChange('wakeup_time', { day, time: formattedTime });
+    setSelectedTime((prev: any) => ({
+      ...prev,
+      [day]: time,
+    }));
+    setPickerVisible((prev) => ({
+      ...prev,
+      [day]: false,
+    }));
   };
-
+  
   const renderQuestion = () => {
     switch (currentQuestion) {
       case 0:
@@ -237,12 +229,19 @@ export default function HomeScreen() {
                 {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day, index) => (
                   <View key={index} style={styles.dayContainer}>
                     <Text style={styles.dayText}>{day}</Text>
-                    <TextInput
-                      style={styles.input}
-                      placeholder="Time"
-                      value={surveyResponses.wakeup_time[day] || ''}
-                      onChangeText={(text) => handleResponseChange('wakeup_time', { day, time: text })}
-                    />
+
+                    <MaterialIcons name="alarm-add" size={24} color="black" onPress={() => setPickerVisible((prev) => ({ ...prev, [day]: true }))}/>
+                    {pickerVisible[day] && (
+                      <DateTimePickerModal
+                        date={selectedTime[day]}
+                        isVisible={pickerVisible[day]}
+                        mode="time"
+                        onConfirm={(date) => handleTimeChange(day, date)}
+                        onCancel={()=>setPickerVisible((prev) => ({ ...prev, [day]: false }))}
+                        is24Hour={true}
+                      />
+                    )}
+
                   </View>
                 ))}
               </View>
@@ -285,6 +284,7 @@ export default function HomeScreen() {
         }
 
       }
+
     } catch (error) {
       console.error('Error fetching user:', error);
     }
@@ -302,9 +302,26 @@ export default function HomeScreen() {
     };
     
     getUserName();
-    fetchUser();
+    // fetchUser();
     fetchDummySleepData();
   }, []);
+
+  useEffect(() => {
+    if(user){
+      if (!user?.survay_completed) {
+          setShowSurveyModal(true);
+        }
+        else{
+          setShowSurveyModal(false)
+        }
+      
+    }
+    else{
+      fetchUser();
+    }
+    
+  }, [user])
+  
 
   useEffect(() => {
     

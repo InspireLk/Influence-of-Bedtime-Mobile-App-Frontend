@@ -10,6 +10,7 @@ import Toast from 'react-native-toast-message';
 import { useEffect, useState } from 'react';
 import { Pedometer } from 'expo-sensors';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import React from 'react';
 
 export default function BestBedTimeScreen() {
 
@@ -91,7 +92,23 @@ export default function BestBedTimeScreen() {
   };
 
   const calculateBedtime = (sleepDuration:any, wakeUpTime:any) => {
-    const [wakeHour, wakeMinute] = wakeUpTime.split(':').map(Number);
+  
+    const timeParts = wakeUpTime.match(/(\d+):(\d+)\s*(AM|PM)/i);
+    if (!timeParts) {
+      console.error("Invalid time format");
+      return;
+    }
+
+    let hour = parseInt(timeParts[1]);
+    const minute = parseInt(timeParts[2]);
+    const period = timeParts[3].toUpperCase();
+
+    // Convert to 24-hour format
+    if (period === 'PM' && hour !== 12) hour += 12;
+    if (period === 'AM' && hour === 12) hour = 0;
+
+    const wakeHour = hour;
+    const wakeMinute = minute;
 
     // Convert sleep duration to hours and minutes
     const sleepHours = Math.floor(sleepDuration);
@@ -100,7 +117,6 @@ export default function BestBedTimeScreen() {
     // Calculate bedtime
     let bedtimeHour = wakeHour - sleepHours;
     let bedtimeMinute = wakeMinute - sleepMinutes;
-
     // Handle negative minutes
     if (bedtimeMinute < 0) {
       bedtimeMinute += 60;
@@ -136,7 +152,7 @@ export default function BestBedTimeScreen() {
 
       const wakeupEntry = user.wakeup_time.find((entry:any) => entry.day === today);
 
-      const wakeupTime = wakeupEntry ? `${wakeupEntry.time.padStart(2, '0')}:00` : "05:00";
+      const wakeupTime = wakeupEntry ? `${wakeupEntry.time.padStart(2, '0')}` : "05:00";
 
       const sleepDuration = parseFloat(bedtime_predicted_data.data.trim());
       const bedtime = calculateBedtime(sleepDuration,wakeupTime);
