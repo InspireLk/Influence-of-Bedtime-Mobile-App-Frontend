@@ -20,6 +20,7 @@ import BestBedTimeScreen from "./best_bed_time";
 import MoodTrackerScreen from './scan_my_face';
 import MySleepPredictionsScreen from "./my_sleep_preditions";
 import SleepInterventionScreen from "./sleep_intervention";
+import SleepInterventionHistoryScreen from "./sleep_intervention_history";
 import HelpScreen from "./help";
 import SleepRecommendationScreen from "./SleepRecommendationScreen";
 import StakeSociety from "./StakeSociety";
@@ -122,6 +123,11 @@ function BottomTabs({ navigation }: any) {
       <Tab.Screen
         name="Sleep Intervention"
         component={SleepInterventionScreen}
+        options={{ tabBarItemStyle: { display: "none" } }}
+      />
+      <Tab.Screen
+        name="Sleep Intervention History"
+        component={SleepInterventionHistoryScreen}
         options={{ tabBarItemStyle: { display: "none" } }}
       />
       <Tab.Screen name="Settings" component={SettingScreen} />
@@ -230,6 +236,14 @@ function DrawerNavigator() {
         initialParams={{ screen: "Sleep Intervention" }}
         options={{
           drawerLabel: "Sleep Intervention",
+        }}
+      />
+       <Drawer.Screen
+        name="Sleep Intervention History"
+        component={BottomTabs}
+        initialParams={{ screen: "Sleep Intervention History" }}
+        options={{
+          drawerLabel: "Sleep Intervention History",
         }}
       />
       <Drawer.Screen
