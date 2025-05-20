@@ -12,6 +12,8 @@ interface StateType {
     loading: boolean;
     signup_state: any;
     submit_survay_state: any;
+    bedtime_predicted_data:null,
+    pushToken:null
 }
 
 interface UserType {
@@ -28,24 +30,31 @@ interface UserType {
     physicalDisability: string,
     physicalDisabilityNote: string,
     workEnvironmentImpact: string,
+    stressLevel: string,
+    wakeup_time:[],
+    pushToken: null
 }
 
 
 type ActionType =
-  | { type: 'INITIAL'; payload: { user: UserType | null; loading: boolean; signup_state: any | null; submit_survay_state:any } }
+  | { type: 'INITIAL'; payload: { user: UserType | null; loading: boolean; signup_state: any | null; submit_survay_state:any; bedtime_predicted_data:any|null; pushToken:any|null; } }
   | { type: 'SIGNIN'; payload: { user: UserType } }
   | { type: 'SIGNOUT' }
   | { type: 'START_LOADING'; payload: { loading: boolean} }
   | { type: 'STOP_LOADING'; payload: { loading: boolean} }
   | { type: 'SIGN_UP'; payload: { signup_state: any} }
   | { type: 'SUBMIT_SURVAY'; payload: { submit_survay_state: any} }
+  | { type: 'GET_BEDTIME_PREDICTED'; payload: { bedtime_predicted_data: any} }
+  | { type: 'SET_PUSH_TOKEN'; payload: { pushToken: any} }
   
 
 const initialState: StateType = {
     user: null,
     loading: false,
     signup_state:null,
-    submit_survay_state: null
+    submit_survay_state: null,
+    bedtime_predicted_data:null,
+    pushToken: null
 };
 
 const reducer = (state: StateType, action: ActionType): StateType => {
@@ -55,7 +64,9 @@ const reducer = (state: StateType, action: ActionType): StateType => {
                 loading: false,
                 user: action.payload.user,
                 signup_state: action.payload.signup_state,
-                submit_survay_state: action.payload.submit_survay_state
+                submit_survay_state: action.payload.submit_survay_state,
+                bedtime_predicted_data: action.payload.bedtime_predicted_data,
+                pushToken: action.payload.pushToken
             };
         case 'SIGNIN':
                 return {
@@ -82,6 +93,21 @@ const reducer = (state: StateType, action: ActionType): StateType => {
                 ...state,
                 submit_survay_state: action.payload.submit_survay_state,
             };
+        case 'GET_BEDTIME_PREDICTED':
+            return {
+                ...state,
+                bedtime_predicted_data: action.payload.bedtime_predicted_data,
+            };
+        case 'SET_PUSH_TOKEN':
+            return {
+                ...state,
+                pushToken: action.payload.pushToken,
+            };
+        case 'SIGNOUT':
+            return {
+                ...state,
+                user: null,
+            };
         
         default:
             return state;
@@ -96,6 +122,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const [state, dispatch] = useReducer(reducer, initialState);
 
     const initialize = useCallback(async () => {
+        
         
         dispatch({
             type:'START_LOADING',
@@ -127,7 +154,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
                             },
                             loading: false,
                             signup_state:null,
-                            submit_survay_state:null
+                            submit_survay_state:null,
+                            bedtime_predicted_data:null,
+                            pushToken:null,
                         },
                     });
                 }
@@ -138,7 +167,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
                             user:null,
                             loading: false,
                             signup_state:null,
-                            submit_survay_state:null
+                            submit_survay_state:null,
+                            bedtime_predicted_data:null,
+                            pushToken:null,
                         },
                     });
                 }
@@ -152,7 +183,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
                     user:null,
                     loading: false,
                     signup_state:null,
-                    submit_survay_state:null
+                    submit_survay_state:null,
+                    bedtime_predicted_data:null,
+                    pushToken:null,
                 },
             });
         }
@@ -160,7 +193,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     useEffect(() => {
         initialize();
-    }, [initialize, state.user]);
+    }, [initialize]);
 
     const sign_in = async (email: string, password: string) => {
         try {
@@ -195,13 +228,27 @@ export function AuthProvider({ children }: AuthProviderProps) {
             
             const response = await axios.post(endpoints.auth.sign_up, userObject);
 
-            
-            dispatch({
-                type: 'SIGN_UP',
-                payload: {
-                    signup_state: response.data
-                },
-            });
+            if (response.data.success) {
+                
+                const jsonValue = JSON.stringify(response.data.user);
+                await AsyncStorage.setItem('user', jsonValue);
+
+                dispatch({
+                    type: 'SIGNIN',
+                    payload: { 
+                        user:{
+                            ...response.data.user
+                        }
+                     },
+                });
+
+                dispatch({
+                    type: 'SIGN_UP',
+                    payload: {
+                        signup_state: response.data
+                    },
+                });
+            }
         }catch(error){
             
             Toast.show({type:'error',text1:'Sign Up failed. Please try again.',position:'bottom', swipeable:true})
@@ -212,8 +259,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const submitSurvay = useCallback(async (survayObject: any, _id: string) => {
 
         try{
-            
-            const response = await axios.post(`${endpoints.user.submit_survay}/${_id}`, survayObject);
+
+            const formattedWakeupTime = Object.entries(survayObject.wakeup_time)
+                .filter(([day, time]) => time) 
+                .map(([day, time]) => ({ day, time }));
+
+                const formattedSurvayObject = {
+                ...survayObject,
+                wakeup_time: formattedWakeupTime, 
+                };
+
+                console.log("Submitting Survey:", formattedSurvayObject);
+        
+            const response = await axios.post(`${endpoints.user.submit_survay}/${_id}`, formattedSurvayObject);
 
             await set_user(response.data.data)
             dispatch({
@@ -239,7 +297,41 @@ export function AuthProvider({ children }: AuthProviderProps) {
     
     }, []);
 
-    const sign_out = () => {
+    const submitPushToken = useCallback(async (token: string, _id: string) => {
+
+        try{
+
+            const data = {
+                "token":token
+            }
+
+            const response = await axios.post(`${endpoints.user.submit_token}/${_id}`,data);
+
+            const {expo_token, user} = response.data;
+
+
+            dispatch({
+                type: 'SET_PUSH_TOKEN',
+                payload: {
+                    pushToken: expo_token
+                },
+            });
+            
+            
+        }catch(error){
+            Toast.show({type:'error',text1:'Failed to submit expo token',position:'bottom', swipeable:true})
+        }
+    
+    }, []);
+
+    const sign_out = async() => {
+        await AsyncStorage.clear()
+        dispatch({
+                    type: 'SIGN_UP',
+                    payload: {
+                        signup_state: null
+                    },
+                });
         dispatch({ type: 'SIGNOUT' });
     };
 
@@ -262,6 +354,31 @@ export function AuthProvider({ children }: AuthProviderProps) {
             Toast.show({type:'error',text1:'Failed to update restart',position:'bottom', swipeable:true})
         }
     };
+
+    const get_bedtime_predict_data = async (_id:any,stepCount:any) => {
+        try {
+
+
+            const response = await axios.get(`${endpoints.user.predict_bedtime}/${_id}/${stepCount}`);
+
+        
+            if (response.data.success) {
+                
+
+                dispatch({
+                    type: 'GET_BEDTIME_PREDICTED',
+                    payload: { 
+                        bedtime_predicted_data:response.data
+                     },
+                });
+            }
+        } catch (error) {
+            console.log('================ffgd====================');
+            console.log(error);
+            console.log('====================================');
+            Toast.show({type:'error',text1:'Failed to get bedtime data',position:'bottom', swipeable:true})
+        }
+    };
  
 
     const memoizedValue = useMemo(
@@ -270,11 +387,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
             loading: state.loading,
             signup_state: state.signup_state,
             submit_survay_state: state.submit_survay_state,
+            bedtime_predicted_data: state.bedtime_predicted_data,
+            pushToken: state.pushToken,
             //
             sign_in,
             sign_out,
             sign_up,
             submitSurvay,
+            get_bedtime_predict_data,
+            submitPushToken,
             
         }),
         [
@@ -283,6 +404,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
             sign_out,
             sign_up,
             submitSurvay,
+            get_bedtime_predict_data,
+            submitPushToken,
         ]
     );
 

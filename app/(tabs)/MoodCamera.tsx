@@ -1,6 +1,6 @@
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 import React, { useState, useRef, useEffect } from 'react';
-import { Button, StyleSheet, Text, TouchableOpacity, View, ActivityIndicator } from 'react-native';
+import { Button, StyleSheet, Text, TouchableOpacity, View, ActivityIndicator, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import * as FileSystem from 'expo-file-system';
@@ -20,6 +20,10 @@ export default function MoodCamera() {
   const [currentEmotion, setCurrentEmotion] = useState('Unknown');
   const [isProcessing, setIsProcessing] = useState(false);
   const [faceResults, setFaceResults] = useState<any[]>([]);
+
+  const [showDialog, setShowDialog] = useState(false);
+  const [capturedFrame, setCapturedFrame] = useState<any>(null);
+
 
   const cameraRef = useRef<CameraView>(null);
   const socketRef = useRef<any>(null);
@@ -47,8 +51,17 @@ export default function MoodCamera() {
 
       if (data.status === 'success') {
         setFaceResults(data.results || []);
+
+
+        // If face detected, set the current emotion and show dialog
         if (data.results && data.results.length > 0) {
           setCurrentEmotion(data.results[0].emotion);
+
+          // Stop streaming and show dialog when face is detected
+          if (!isStreaming && !showDialog) {
+            handleFaceDetected(data.results[0].emotion);
+          }
+
         } else {
           setCurrentEmotion('No face detected');
         }
@@ -64,7 +77,39 @@ export default function MoodCamera() {
         socketRef.current.disconnect();
       }
     };
-  }, []);
+
+  }, [isStreaming, showDialog]);
+
+  const handleFaceDetected = async (emotion: string) => {
+    // Stop streaming
+    stopStreaming();
+
+    try {
+      // Capture the current frame
+      if (cameraRef.current) {
+        const photo = await cameraRef.current.takePictureAsync({
+          quality: 0.7,
+          exif: false,
+        });
+
+        // Convert image to base64
+        const base64Image = await convertToBase64(photo.uri);
+
+        // Store the captured frame data
+        setCapturedFrame({
+          photoUri: photo.uri,
+          mood: emotion,
+          base64Image: base64Image
+        });
+
+        // Show the dialog
+        setShowDialog(true);
+      }
+    } catch (error) {
+      console.error('Error capturing frame:', error);
+    }
+  };
+
 
   const stopStreaming = () => {
     setIsStreaming(false);
@@ -185,43 +230,41 @@ export default function MoodCamera() {
     }
   };
 
-  const takePicture = async () => {
-    if (cameraRef.current) {
+
+  const handleContinue = async () => {
+    if (capturedFrame) {
+      setShowDialog(false);
+
+      // Process the captured frame
       try {
         setLoading(true);
-        setError(null);
 
-        const photo = await cameraRef.current.takePictureAsync({
-          quality: 0.5,
-          exif: false,
+        // Call the emotion detection API to get the processed image
+        const result = await detectEmotion(capturedFrame.base64Image);
+
+        // Navigate to the detail screen
+        navigation.navigate('MoodDetailScreen', {
+          photoUri: capturedFrame.photoUri,
+          mood: capturedFrame.mood,
+          processedImageBase64: result.processed_image || null
         });
 
-        if (photo) {
-          // Convert image to base64
-          const base64Image = await convertToBase64(photo.uri);
-
-          // Call the emotion detection API
-          const result = await detectEmotion(base64Image);
-
-          // If API call is successful, navigate to the next screen
-          if (result && result.emotion) {
-            navigation.navigate('MoodDetailScreen', {
-              photoUri: photo.uri,
-              mood: result.emotion,
-              processedImageBase64: result.processed_image
-            });
-          } else {
-            setError('Could not detect emotion. Please try again.');
-          }
-        }
       } catch (error: any) {
         console.error('Failed to process image:', error);
         setError(error.message || 'Error processing image. Please try again.');
       } finally {
         setLoading(false);
+
+        setCapturedFrame(null);
       }
     }
   };
+
+  const handleCancel = () => {
+    setShowDialog(false);
+    setCapturedFrame(null);
+  };
+
 
   return (
     <View style={styles.container}>
@@ -258,18 +301,28 @@ export default function MoodCamera() {
         </View>
 
         <View style={styles.controlsContainer}>
+
+          {/* Camera reverse button commented out as requested
           <TouchableOpacity style={styles.controlButton} onPress={toggleCameraFacing}>
             <Ionicons name="camera-reverse" size={32} color="white" />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
+
 
           <TouchableOpacity
             style={[styles.streamButton, isStreaming ? styles.streamingActive : {}]}
             onPress={toggleStreaming}
+
+            disabled={showDialog}
           >
-            <Text style={styles.streamButtonText}>
-              {isStreaming ? 'Stop Stream' : 'Start Stream'}
-            </Text>
+            {/* Icon based start/stop stream button */}
+            <Ionicons
+              name={isStreaming ? "stop-circle" : "videocam"}
+              size={32}
+              color="white"
+            />
           </TouchableOpacity>
+
+          {/* Capture button commented out as requested
 
           {loading ? (
             <View style={styles.captureButton}>
@@ -283,7 +336,9 @@ export default function MoodCamera() {
             >
               <View style={styles.captureButtonInner} />
             </TouchableOpacity>
-          )}
+
+          )} */}
+
         </View>
 
         {error && (
@@ -292,6 +347,45 @@ export default function MoodCamera() {
           </View>
         )}
       </CameraView>
+
+
+      {/* Face detection dialog */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={showDialog}
+        onRequestClose={handleCancel}
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <Text style={styles.modalTitle}>Face Detected!</Text>
+            <Text style={styles.modalText}>
+              Detected emotion: {capturedFrame?.mood || 'Unknown'}
+            </Text>
+
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.cancelButton]}
+                onPress={handleCancel}
+              >
+                <Text style={styles.buttonText}>Cancel</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.modalButton, styles.continueButton]}
+                onPress={handleContinue}
+              >
+                {loading ? (
+                  <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                  <Text style={styles.buttonText}>Continue</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
     </View>
   );
 }
@@ -356,9 +450,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   streamButton: {
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    borderRadius: 25,
+
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+
     backgroundColor: 'rgba(0, 0, 0, 0.6)',
     justifyContent: 'center',
     alignItems: 'center',
@@ -398,4 +494,54 @@ const styles = StyleSheet.create({
     color: 'white',
     textAlign: 'center',
   },
+
+  centeredView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 35,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  modalText: {
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  modalButton: {
+    padding: 10,
+    marginHorizontal: 10,
+    borderRadius: 5,
+  },
+  cancelButton: {
+    backgroundColor: 'red',
+  },
+  continueButton: {
+    backgroundColor: 'green',
+  },
+  buttonText: {
+    color: 'white',
+  },
+
 });

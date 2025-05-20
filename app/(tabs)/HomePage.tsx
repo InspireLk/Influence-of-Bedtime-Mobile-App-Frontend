@@ -8,7 +8,11 @@ import StressDash from '@/components/StressDash';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuthContext } from '@/context/hooks';
 import Toast from 'react-native-toast-message';
-
+import React from 'react';
+import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
+import RNDateTimePicker from '@react-native-community/datetimepicker';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
 interface SleepData {
   name: string;
   hours: number;
@@ -39,8 +43,8 @@ const fetchUserName = async (): Promise<string> => {
 
 export default function HomeScreen() {
 
-  const { submitSurvay, submit_survay_state } = useAuthContext()
-
+    const { submitSurvay, submit_survay_state } = useAuthContext()
+  
   const [userName, setUserName] = useState<string>('Loading...');
   const { colors } = useTheme();
   const [sleepData, setSleepData] = useState<SleepData[]>([]);
@@ -54,9 +58,38 @@ export default function HomeScreen() {
     physicalDisability: null,
     physicalDisabilityNote: '',
     workEnvironmentImpact: null,
+    wakeup_time: {
+      Monday: '',
+      Tuesday: '',
+      Wednesday: '',
+      Thursday: '',
+      Friday: '',
+      Saturday: '',
+      Sunday: ''
+    },
+    sleepHours: '',
+    bedtimeActivity: '',
+    bedroomEnvironment: {
+      temperature: '',
+      light: '',
+      noise: '',
+      airQuality: '',
+      bedComfort: '',
+    },
+    physicalActivityBeforeBed: '',
+    diet: '',
+    dietOther: '',
+    employmentStatus: '',
   });
 
+
   const [user, setUser] = useState<any>(null);
+
+  const [showTimePicker, setShowTimePicker] = useState(false);
+  const [selectedDay, setSelectedDay] = useState<any>(null); 
+  const [selectedTime, setSelectedTime] = useState<any>([]);
+
+  const [pickerVisible, setPickerVisible] = useState<{ [key: string]: boolean }>({});
 
   const fetchDummySleepData = async () => {
     try {
@@ -75,7 +108,7 @@ export default function HomeScreen() {
   };
 
   const handleNextQuestion = () => {
-    if (currentQuestion < 2) {
+    if (currentQuestion < 8) {
       setCurrentQuestion(currentQuestion + 1);
     }
   };
@@ -86,16 +119,42 @@ export default function HomeScreen() {
     }
   };
 
-  const handleResponseChange = (question: string, value: any) => {
-    setSurveyResponses({ ...surveyResponses, [question]: value });
+  const handleResponseChange = (key:any, value:any) => {
+    if (key === 'wakeup_time') {
+      setSurveyResponses((prev:any) => ({
+        ...prev,
+        wakeup_time: {
+          ...prev.wakeup_time, 
+          [value.day]: value.time, 
+        }
+      }));
+    } else {
+      setSurveyResponses((prev:any) => ({
+        ...prev,
+        [key]: value
+      }));
+    }
   };
 
+  const handleTimeChange = (day: string, time: Date) => {
+    const formattedTime = time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    handleResponseChange('wakeup_time', { day, time: formattedTime });
+    setSelectedTime((prev: any) => ({
+      ...prev,
+      [day]: time,
+    }));
+    setPickerVisible((prev) => ({
+      ...prev,
+      [day]: false,
+    }));
+  };
+  
   const renderQuestion = () => {
     switch (currentQuestion) {
       case 0:
         return (
           <View>
-            <Text style={styles.modalTitle}>Question 1/3</Text>
+            <Text style={styles.modalTitle}>Question 1/4</Text>
             <Text style={styles.modalText}>Are you suffering any sleeping disorders?</Text>
             <View style={styles.radioContainer}>
               <TouchableOpacity
@@ -128,7 +187,7 @@ export default function HomeScreen() {
       case 1:
         return (
           <View>
-            <Text style={styles.modalTitle}>Question 2/3</Text>
+            <Text style={styles.modalTitle}>Question 2/4</Text>
             <Text style={styles.modalText}>Are you having any physical disabilities?</Text>
             <View style={styles.radioContainer}>
               <TouchableOpacity
@@ -161,7 +220,7 @@ export default function HomeScreen() {
       case 2:
         return (
           <View>
-            <Text style={styles.modalTitle}>Question 3/3</Text>
+            <Text style={styles.modalTitle}>Question 3/4</Text>
             <Text style={styles.modalText}>How is your working environment affecting your mental health?</Text>
             <Text style={styles.modalText}>Rate 1-10 (1 for very low, 10 for too high)</Text>
             <TextInput
@@ -173,28 +232,194 @@ export default function HomeScreen() {
             />
           </View>
         );
+      case 3:
+          return (
+            <View>
+              <Text style={styles.modalTitle}>Question 4/4</Text>
+              <Text style={styles.modalText}>Please provide your wake-up times for the following days of the week:</Text>
+
+              {/* Container for days of the week */}
+              <View style={styles.wakeUpTimeRowContainer}>
+                {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day, index) => (
+                  <View key={index} style={styles.dayContainer}>
+                    <Text style={styles.dayText}>{day}</Text>
+
+                    <MaterialIcons name="alarm-add" size={24} color="black" onPress={() => setPickerVisible((prev) => ({ ...prev, [day]: true }))}/>
+                    {pickerVisible[day] && (
+                      <DateTimePickerModal
+                        date={selectedTime[day]}
+                        isVisible={pickerVisible[day]}
+                        mode="time"
+                        onConfirm={(date) => handleTimeChange(day, date)}
+                        onCancel={()=>setPickerVisible((prev) => ({ ...prev, [day]: false }))}
+                        is24Hour={true}
+                      />
+                    )}
+
+                  </View>
+                ))}
+              </View>
+
+            </View>
+          );
+      case 4:
+            return (
+              <View>
+                <Text style={styles.modalTitle}>Question 5/10</Text>
+                <Text style={styles.modalText}>How many hours of sleep are you currently getting?</Text>
+                {['Less than 5 hours', '5 hours', '6 hours', 'More than 7 hours'].map((option) => (
+                  <TouchableOpacity key={option} style={styles.radioButton} onPress={() => handleResponseChange('sleepHours', option)}>
+                    <View style={styles.radioCircle}>
+                      {surveyResponses.sleepHours === option && <View style={styles.selectedRb} />}
+                    </View>
+                    <Text style={styles.radioText}>{option}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            );
+      case 5:
+            return (
+              <View>
+                <Text style={styles.modalTitle}>Question 6/10</Text>
+                <Text style={styles.modalText}>What do you usually do before bed?</Text>
+                {['Social Media Apps', 'Entertainment Apps', 'Work-Related Tasks', 'Messaging Platforms'].map((option) => (
+                  <TouchableOpacity key={option} style={styles.radioButton} onPress={() => handleResponseChange('bedtimeActivity', option)}>
+                    <View style={styles.radioCircle}>
+                      {surveyResponses.bedtimeActivity === option && <View style={styles.selectedRb} />}
+                    </View>
+                    <Text style={styles.radioText}>{option}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            );
+      // case 6:
+      //       return (
+      //         <View>
+      //           <Text style={styles.modalTitle}>Question 7/10</Text>
+      //           <Text style={styles.modalText}>What are the environmental conditions in your bedroom?</Text>
+      //           {['temperature', 'light', 'noise', 'airQuality', 'bedComfort'].map((key) => {
+      //             const options = {
+      //               temperature: ['Hot', 'Warm', 'Cool'],
+      //               light: ['Bright', 'Dim', 'Dark'],
+      //               noise: ['Quiet', 'Some Noise', 'Loud'],
+      //               airQuality: ['Fresh', 'Stuffy'],
+      //               bedComfort: ['Comfortable', 'Neutral', 'Uncomfortable']
+      //             } as const;
+
+      //             type BedroomKey = keyof typeof options;
+      //             const keys: BedroomKey[] = ['temperature', 'light', 'noise', 'airQuality', 'bedComfort'];
+
+      //             return (
+      //               <View key={key}>
+      //                 <Text style={styles.modalText}>{key.charAt(0).toUpperCase() + key.slice(1)}</Text>
+      //                 {keys.map((key) => (
+      //                   <View key={key}>
+      //                     <Text style={styles.modalText}>{key.charAt(0).toUpperCase() + key.slice(1)}</Text>
+      //                     {options[key].map((opt) => (
+      //                       <TouchableOpacity
+      //                         key={opt}
+      //                         style={styles.radioButton}
+      //                         onPress={() =>
+      //                           setSurveyResponses((prev: any) => ({
+      //                             ...prev,
+      //                             bedroomEnvironment: {
+      //                               ...prev.bedroomEnvironment,
+      //                               [key]: opt
+      //                             }
+      //                           }))
+      //                         }>
+      //                         <View style={styles.radioCircle}>
+      //                           {surveyResponses.bedroomEnvironment[key] === opt && <View style={styles.selectedRb} />}
+      //                         </View>
+      //                         <Text style={styles.radioText}>{opt}</Text>
+      //                       </TouchableOpacity>
+      //                     ))}
+      //                   </View>
+      //                 ))}
+
+      //               </View>
+      //             );
+      //           })}
+      //         </View>
+      //       );
+      case 6:
+            return (
+              <View>
+                <Text style={styles.modalTitle}>Question 7/10</Text>
+                <Text style={styles.modalText}>How would you describe your physical activity before bed?</Text>
+                {['Yes, heavy workouts', 'Yes, light exercise (e.g., walking, stretching)', 'No physical activity'].map((option) => (
+                  <TouchableOpacity key={option} style={styles.radioButton} onPress={() => handleResponseChange('physicalActivityBeforeBed', option)}>
+                    <View style={styles.radioCircle}>
+                      {surveyResponses.physicalActivityBeforeBed === option && <View style={styles.selectedRb} />}
+                    </View>
+                    <Text style={styles.radioText}>{option}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            );
+      case 7:
+            return (
+              <View>
+                <Text style={styles.modalTitle}>Question 8/10</Text>
+                <Text style={styles.modalText}>What kind of diet are you following?</Text>
+                {['Balanced Diet', 'High-Protein', 'Low-Carb/Keto', 'Vegetarian/Vegan', 'Other'].map((option) => (
+                  <TouchableOpacity key={option} style={styles.radioButton} onPress={() => handleResponseChange('diet', option)}>
+                    <View style={styles.radioCircle}>
+                      {surveyResponses.diet === option && <View style={styles.selectedRb} />}
+                    </View>
+                    <Text style={styles.radioText}>{option}</Text>
+                  </TouchableOpacity>
+                ))}
+                {surveyResponses.diet === 'Other' && (
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Please specify"
+                    value={surveyResponses.dietOther}
+                    onChangeText={(text) => handleResponseChange('dietOther', text)}
+                  />
+                )}
+              </View>
+            );
+      case 8:
+            return (
+              <View>
+                <Text style={styles.modalTitle}>Question 9/10</Text>
+                <Text style={styles.modalText}>What is your current employment status?</Text>
+                {['Student', 'Employed', 'Student + Work', 'Unemployed'].map((option) => (
+                  <TouchableOpacity key={option} style={styles.radioButton} onPress={() => handleResponseChange('employmentStatus', option)}>
+                    <View style={styles.radioCircle}>
+                      {surveyResponses.employmentStatus === option && <View style={styles.selectedRb} />}
+                    </View>
+                    <Text style={styles.radioText}>{option}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            );
+
+
+        
       default:
         return null;
     }
   };
 
-  const handleSurveySubmit = async () => {
-
+  const handleSurveySubmit = async() => {
+    
     try {
-
-      await submitSurvay?.(surveyResponses, user._id);
+      
+      await submitSurvay?.(surveyResponses,user._id);
 
     } catch (error) {
-      Toast.show({ type: 'error', text1: 'Failed to submit survay', position: 'bottom', swipeable: true })
+      Toast.show({type:'error',text1:'Failed to submit survay',position:'bottom', swipeable:true})
     }
   };
 
   const fetchUser = async () => {
-
+      
     try {
-
+      
       const userString = await AsyncStorage.getItem('user');
-
+      
       if (userString) {
         const user = JSON.parse(userString);
         setUser(user);
@@ -202,11 +427,12 @@ export default function HomeScreen() {
         if (!user.survay_completed) {
           setShowSurveyModal(true);
         }
-        else {
+        else{
           setShowSurveyModal(false)
         }
 
       }
+
     } catch (error) {
       console.error('Error fetching user:', error);
     }
@@ -222,21 +448,38 @@ export default function HomeScreen() {
         setUserName('Guest');
       }
     };
-
+    
     getUserName();
-    fetchUser();
+    // fetchUser();
     fetchDummySleepData();
   }, []);
 
   useEffect(() => {
-
-    if (submit_survay_state && submit_survay_state.success) {
+    if(user){
+      if (!user?.survay_completed) {
+          setShowSurveyModal(true);
+        }
+        else{
+          setShowSurveyModal(false)
+        }
+      
+    }
+    else{
       fetchUser();
-      Toast.show({ type: 'success', text1: 'Survay completed', position: 'bottom', swipeable: true })
+    }
+    
+  }, [user])
+  
+
+  useEffect(() => {
+    
+    if(submit_survay_state && submit_survay_state.success){
+      fetchUser();
+      Toast.show({type:'success',text1:'Survay completed',position:'bottom', swipeable:true})
     }
 
   }, [submit_survay_state])
-
+  
 
   if (loading) return <ActivityIndicator size="large" color={colors.primary} />;
 
@@ -308,20 +551,20 @@ export default function HomeScreen() {
               {currentQuestion > 0 && (
                 <Button title="Previous" onPress={handlePreviousQuestion} />
               )}
-              {currentQuestion < 2 ? (
+              {currentQuestion < 7 ? (
                 <Button title="Next" onPress={handleNextQuestion} />
               ) : (
                 <Button title="Submit" onPress={handleSurveySubmit} />
               )}
             </View>
             <View style={styles.closeButton}>
-              <Button title="Close" onPress={() => setShowSurveyModal(false)} />
+              <Button title="Close" onPress={()=>setShowSurveyModal(false)} />
             </View>
-
+            
           </View>
         </View>
       </Modal>
-
+      
     </View>
   );
 }
@@ -391,9 +634,9 @@ const styles = StyleSheet.create({
     width: '100%',
     marginTop: 20,
   },
-  closeButton: {
+  closeButton:{
     flexDirection: 'row',
-    justifyContent: 'flex-end',
+    justifyContent:'flex-end',
     width: '100%',
     marginTop: 20,
   },
@@ -444,5 +687,25 @@ const styles = StyleSheet.create({
   },
   radioText: {
     fontSize: 16,
+  },
+  wakeUpTimeRowContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    marginVertical: 10,
+  },
+  dayContainer: {
+    alignItems: 'center',
+    marginHorizontal: 5,
+    marginVertical: 5,
+  },
+  dayText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 5,
+  },
+  timeText: {
+    fontSize: 16,
+    color: '#333',
   },
 });
