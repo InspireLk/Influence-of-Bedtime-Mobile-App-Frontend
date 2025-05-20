@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Alert, View, Text, TextInput, Button, FlatList, StyleSheet, TouchableOpacity, Modal, Linking } from 'react-native';
 import axios, { endpoints } from "@/utils/axios";
 import { useFocusEffect } from '@react-navigation/native'; // For resetting state when screen comes into focus
+import Icon from 'react-native-vector-icons/FontAwesome';
+import Icon1 from 'react-native-vector-icons/MaterialCommunityIcons';
 
 type Message = {
   text: string;
@@ -16,28 +18,28 @@ interface ApiResponse {
 
 const questionSets = [
   [
-    { question: "Hello! How are you feeling at this moment?", type: "text" },
-    { question: "Can you share what might be causing this?", type: "text" },
+    { question: "Hey, it’s pretty late! What’s keeping you up tonight?", type: "text" },
+    { question: "If you could tell me your current thoughts, what would it be?", type: "text" },
     { question: "How has this been affecting your day so far?", type: "text" },
     { question: "What is your current preference for spending your time?", type: "text" },
   ],
   [
-    { question: "Can you describe any physical symptoms you are experiencing, such as headaches, tension, or fatigue?", type: "text" },
-    { question: "Have you noticed any recent changes in your sleep patterns or appetite?", type: "yesno", positiveAnswer: "I have noticed changes in my sleep patterns or appetite.", negativeAnswer: "I have not noticed changes in my sleep patterns or appetite." },
+    { question: "Hey it’s bedtime, but you’re still up! What’s keeping you from falling asleep?", type: "text" },
+    { question: "Have you noticed any recent changes in your sleep patterns or appetite?", type: "yesno", positiveAnswer: "Yes, I have definitely noticed some changes in how I am sleeping or how my appetite has been lately", negativeAnswer: "I have not noticed changes in my sleep patterns or appetite." },
     { question: "How do you usually cope with stress or emotional difficulties?", type: "text" },
-    { question: "Is there anything specific that has been on your mind frequently?", type: "yesno", positiveAnswer: "I have had specific thoughts on my mind frequently.", negativeAnswer: "I have not had specific thoughts on my mind frequently." },
+    { question: "Would you like me to help you calm your body or your mind first?", type: "yesno", positiveAnswer: "I have had specific thoughts on my mind frequently.", negativeAnswer: "I have not had specific thoughts on my mind frequently." },
   ],
   [
-    { question: "When was the last time you felt completely relaxed, and what were you doing?", type: "text" },
-    { question: "Do you find it difficult to concentrate or make decisions lately?", type: "yesno", positiveAnswer: "I have been finding it difficult to concentrate or make decisions.", negativeAnswer: "I have not been finding it difficult to concentrate or make decisions." },
+    { question: "Hey there, what’s going on that’s stopping you from drifting off to sleep tonight?", type: "text" },
+    { question: "Do you find it difficult to concentrate or make decisions lately?", type: "yesno", positiveAnswer: "Yes, I have been finding it difficult to concentrate or make decisions.", negativeAnswer: "No, I have been able to concentrate and make decisions just fine lately!" },
     { question: "How often do you feel overwhelmed by your daily tasks and responsibilities?", type: "text" },
     { question: "Have you noticed any recent changes in your interactions with family, friends, or colleagues?", type: "text" },
   ],
   [
-    { question: "Have you been feeling more irritable or impatient than usual?", type: "yesno", positiveAnswer: "I have been feeling more irritable or impatient than usual.", negativeAnswer: "I have not been feeling more irritable or impatient than usual." },
-    { question: "Do you often feel drained or exhausted, even after resting?", type: "yesno", positiveAnswer: "I often feel drained or exhausted, even after resting.", negativeAnswer: "I do not feel drained or exhausted, even after resting." },
+    { question: "Hey...Is there something on your mind that you can’t stop thinking about tonight?", type: "yesno", positiveAnswer: "Yes, I can not stop thinking about something.", negativeAnswer: "No, there is nothing on my mind right now." },
+    { question: "Do you feel like your thoughts are making it harder to relax and fall asleep?", type: "yesno", positiveAnswer: "Yes, my thoughts are making it hard to relax.", negativeAnswer: "No, I usually feel refreshed and recharged after resting." },
     { question: "How do you usually react to unexpected challenges or stressful situations?", type: "text" },
-    { question: "Have you recently felt a loss of interest in activities you used to enjoy?", type: "yesno", positiveAnswer: "I have recently felt a loss of interest in activities I used to enjoy.", negativeAnswer: "I have not felt a loss of interest in activities I used to enjoy." },
+    { question: "Have you recently felt a loss of interest in activities you used to enjoy?", type: "yesno", positiveAnswer: "Yes I do not have interest in anything I do", negativeAnswer: "No, I am still enjoying the activities I used to." },
   ]
 ];
 
@@ -93,7 +95,7 @@ const SleepInterventionScreen: React.FC = () => {
     setLoading(true);
     try {
       const response = await axios.post<ApiResponse>(
-        'http://10.0.2.2:5001/predictIntervention',
+        'http://127.0.0.1:5001/predictIntervention',
         {
           answers: updatedAnswers.join(' '),
           user_level: 2,
@@ -173,21 +175,21 @@ const SleepInterventionScreen: React.FC = () => {
     const words = text.split(' ');
 
     return words.every(word => {
-        // Check if the word has at least one letter
-        if (!/[a-zA-Z?]/.test(word)) return false;
+      // Check if the word has at least one letter
+      if (!/[a-zA-Z?]/.test(word)) return false;
 
-        // Ensure word length is at least 3
-        // if (word.length < 3) return false;
+      // Ensure word length is at least 3
+      // if (word.length < 3) return false;
 
-        // Check if it consists of only repeated letters (invalid case)
-        if (/^([a-zA-Z])\1+$/.test(word)) return false;
+      // Check if it consists of only repeated letters (invalid case)
+      if (/^([a-zA-Z])\1+$/.test(word)) return false;
 
-        // Ensure 't' represents repeating letters
-        if (/t{3,}/.test(word)) return false;
+      // Ensure 't' represents repeating letters
+      if (/t{3,}/.test(word)) return false;
 
-        return true;
+      return true;
     });
-};
+  };
 
 
   const handleCloseModal = () => {
@@ -208,54 +210,59 @@ const SleepInterventionScreen: React.FC = () => {
       emotion: emotion,
       stress_level: stress_level,
       intervention: intervention
-    });
+    },
+      { headers: { 'Content-Type': 'application/json' } });
+    console.log("%%%%%%%%");
+    console.log(response);
+    console.log("%%%%%%%%");
     if (response.status === 201) {
       Alert.alert("Success", "Record saved successfully");
       setQuestionVisible(false);
-      setModalVisible(false); 
+      setModalVisible(false);
     } else {
       Alert.alert("Error", "Failed to save record");
     }
-  
+
   };
 
   const handleSuggestion = (emotion: string) => {
     setSuggestionModalVisible(true);
+    setModalVisible(false);
     const emotionSuggestions: { [key: string]: { videos: { linkName: string; link: string }[]; songs: { linkName: string; link: string }[] } } = {
       Happy: {
         videos: [
           { linkName: "Affirmations before sleep ", link: "https://youtube.com/shorts/Lk-cNWmADaQ?si=hLzsUdm_-lf9GbU9" },
           { linkName: "Affirmations", link: "https://youtube.com/shorts/MFybvVd5kjU?si=pXNaPryWA8JSkFNK" }
         ],
-        songs:[]
+        songs: []
       },
       Calm: {
         videos: [
           { linkName: "Ocean wave", link: "https://youtube.com/shorts/BirAwHctifo?si=z3aVM_-Dy2O9KAO0" },
           { linkName: "Rain on leaves", link: "https://youtu.be/Go4YMAws6BU?si=SnORRwbC4YBKIXX-" }
         ],
-        songs:[]
+        songs: []
       },
       Anxious: {
         videos: [
           { linkName: "4 2 6 breathing exercise for anxiety", link: "https://youtube.com/shorts/fiW-kErshcU?si=Vri8jZZLQLUMPcTp" },
           { linkName: "Body Tension Releas", link: "https://youtube.com/shorts/Y4tZywA2k6M?si=mxTMFlMHHj5aUcOk" }
         ],
-        songs:[]
+        songs: []
       },
       Sad: {
         videos: [
           { linkName: "Heart-Centered Breathing 1", link: "https://youtube.com/shorts/u1SNUuZd6DA?si=WvNi1vrRsLT-28_Y" },
           { linkName: "Heart-Centered Breathing 2", link: "https://youtube.com/shorts/Z5xErM57JY4?si=svSzIs-DTXSXZmNC" }
         ],
-        songs:[]
+        songs: []
       },
       Frustrated: {
         videos: [
-          { linkName: "Quick Frustration Releas", link: "https://youtube.com/shorts/zOi56YybbvY?si=Y8aM19-8x6QIRHWP" },
+          { linkName: "Quick Frustration Reels", link: "https://youtube.com/shorts/zOi56YybbvY?si=Y8aM19-8x6QIRHWP" },
           { linkName: "Mental “Let-It-Go” Practice", link: "https://youtu.be/AJ0DQR6M1PM?si=k9mcH6AkYxy23Uat" }
         ],
-        songs:[]
+        songs: []
       },
       Stressed: {
         videos: [
@@ -263,7 +270,7 @@ const SleepInterventionScreen: React.FC = () => {
           { linkName: "Mindful Body Check-in", link: "https://youtu.be/SK8v_R-5p90?si=LmZsiI6uhrYyxcBx" },
           { linkName: "Visualization to Lower Cortisol", link: "https://youtube.com/shorts/hPqLwL8ZpKo?si=bnm7bMyJrxRCB539" }
         ],
-        songs:[]
+        songs: []
       }
     };
 
@@ -275,15 +282,15 @@ const SleepInterventionScreen: React.FC = () => {
       <Modal visible={visible} animationType="slide" transparent={true}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-          {suggestions.videos.length > 0 &&<Text style={styles.modalText}>Suggested Videos:</Text>}
+            {suggestions.videos.length > 0 && <Text style={styles.modalText}>Suggested Videos:</Text>}
             {suggestions.videos.map((video, index) => (
               <TouchableOpacity key={index} onPress={() => Linking.openURL(video.link)}>
-                  <Text style={styles.linkNameText}>{video.linkName}</Text>
+                <Text style={styles.linkNameText}>{video.linkName}</Text>
                 <Text style={styles.linkText}>{video.link}</Text>
               </TouchableOpacity>
             ))}
 
-            {suggestions.songs.length > 0 &&<Text style={styles.modalText}>Suggested Songs:</Text>}
+            {suggestions.songs.length > 0 && <Text style={styles.modalText}>Suggested Songs:</Text>}
             {suggestions.songs.map((song, index) => (
               <TouchableOpacity key={index} onPress={() => Linking.openURL(song.link)}>
                 <Text style={styles.linkNameText}>{song.linkName}</Text>
@@ -305,8 +312,12 @@ const SleepInterventionScreen: React.FC = () => {
         data={messages}
         keyExtractor={(_, index) => index.toString()}
         renderItem={({ item }) => (
-          <View style={item.isBot ? styles.botMessage : styles.userMessage}>
-            <Text>{item.text}</Text>
+          <View style={[styles.messageRow, item.isBot ? styles.botRow : styles.userRow]}>
+            {item.isBot && <Icon1 name="robot" size={28} color="#4A90E2" />}
+            <View style={item.isBot ? styles.botMessage : styles.userMessage}>
+              <Text style={styles.messageText}>{item.text}</Text>
+            </View>
+            {!item.isBot && <Icon name="user" size={28} color="#7393B3" />}
           </View>
         )}
       />
@@ -324,6 +335,7 @@ const SleepInterventionScreen: React.FC = () => {
                 onChangeText={setUserInput}
                 placeholder="Type your answer..."
               />
+
               <Button title={loading ? 'Processing...' : 'Send'} onPress={handleTextAnswer} disabled={loading || userInput.trim() === ''} />
             </>
           )}
@@ -363,36 +375,66 @@ const SleepInterventionScreen: React.FC = () => {
         )
       }
 
+
       <Modal visible={modalVisible} animationType="slide" transparent={true}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             {interventionResponse && (
               <>
-                <Text style={styles.modalText}>Emotion: {interventionResponse.emotion}</Text>
-                <Text style={styles.modalText}>Stress Level: {interventionResponse.stress_level}</Text>
-                <Text style={styles.modalText}>Suggested Intervention: {interventionResponse.intervention}</Text>
-                <View style={styles.modalViewButton}>
-                  <View style={styles.modalButton}>
-                    <Button
-                      title="Save Details"
-                      onPress={() => handleSaveDetails(interventionResponse.emotion, interventionResponse.stress_level, interventionResponse.intervention)}
-                    />
-                  </View>
-                  <View style={styles.modalButton}>
-                    <Button
-                      title="Suggestion"
-                      onPress={() => handleSuggestion(interventionResponse.emotion)}
-                    />
-                  </View>
-                  <View style={styles.modalButton}>
-                    <Button title="Close" onPress={handleCloseModal} />
-                  </View>
+                <Text style={styles.modalTitle}> Your Wellness Insight</Text>
+
+                <View style={styles.infoRow}>
+                  <Icon name="smile-o" size={20} color="#ff9800" />
+                  <Text style={styles.modalText}>Emotion: {interventionResponse.emotion}</Text>
+                </View>
+
+                <View style={styles.infoRow}>
+                  <Icon name="heartbeat" size={20} color="#f44336" />
+                  <Text style={styles.modalText}>Stress Level: {interventionResponse.stress_level}</Text>
+                </View>
+
+                <View style={styles.infoRow}>
+                  <Icon name="lightbulb-o" size={20} color="#4caf50" />
+                  <Text style={styles.modalText}>Suggested: {interventionResponse.intervention}</Text>
+                </View>
+
+                <View style={styles.modalActions}>
+                  <TouchableOpacity
+                    style={[styles.modalButtonStyled, { backgroundColor: '#4caf50' }]}
+                    onPress={() =>
+                      handleSaveDetails(
+                        interventionResponse.emotion,
+                        interventionResponse.stress_level,
+                        interventionResponse.intervention
+                      )
+                    }
+                  >
+                    <Icon name="save" size={16} color="#fff" />
+                    <Text style={styles.modalButtonText}>Save</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={[styles.modalButtonStyled, { backgroundColor: '#2196f3' }]}
+                    onPress={() => handleSuggestion(interventionResponse.emotion)}
+                  >
+                    <Icon name="magic" size={16} color="#fff" />
+                    <Text style={styles.modalButtonText}>Suggestion</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={[styles.modalButtonStyled, { backgroundColor: '#9e9e9e' }]}
+                    onPress={handleCloseModal}
+                  >
+                    <Icon name="times" size={16} color="#fff" />
+                    <Text style={styles.modalButtonText}>Close</Text>
+                  </TouchableOpacity>
                 </View>
               </>
             )}
           </View>
         </View>
       </Modal>
+
 
       <SuggestionModal
         visible={suggestionModalVisible}
@@ -404,28 +446,89 @@ const SleepInterventionScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16 },
-  botMessage: { alignSelf: 'flex-start', backgroundColor: '#f1f1f1', padding: 8, borderRadius: 8, marginBottom: 8 },
-  userMessage: { alignSelf: 'flex-end', backgroundColor: '#007bff', padding: 8, borderRadius: 8, marginBottom: 8 },
-  input: { borderWidth: 1, borderColor: '#ccc', borderRadius: 8, padding: 8, marginBottom: 8 },
-  errorText: { color: 'red', marginBottom: 8, textAlign: 'center' },
-  buttonContainer: { flexDirection: 'row', justifyContent: 'space-evenly', marginTop: 20 },
-  button: { backgroundColor: '#007bff', padding: 10, borderRadius: 8, marginHorizontal: 10 },
-  buttonText: { color: 'white', fontSize: 16 },
-  question: { marginBottom: 20, fontSize: 18, textAlign: 'center' },
-  modalOverlay: {
+  container: {
     flex: 1,
-    justifyContent: 'center',
+    padding: 16,
+    backgroundColor: '#E5ECF4',
+  },
+  messageRow: {
+    flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    marginBottom: 12,
   },
-  modalContent: {
+  botRow: {
+    justifyContent: 'flex-start',
+  },
+  userRow: {
+    justifyContent: 'flex-end',
+  },
+  botMessage: {
+    maxWidth: '75%',
+    backgroundColor: '#f0f0f0',
+    padding: 12,
+    borderRadius: 16,
+    borderTopLeftRadius: 0,
+    marginHorizontal: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  userMessage: {
+    maxWidth: '75%',
+    backgroundColor: '#4A90E2',
+    padding: 12,
+    borderRadius: 16,
+    borderTopRightRadius: 0,
+    marginHorizontal: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  messageText: {
+    color: '#000',
+  },
+  avatar: {
+    fontSize: 24,
+    marginHorizontal: 4,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 16,
+    padding: 12,
+    marginBottom: 12,
     backgroundColor: 'white',
-    padding: 20,
-    borderRadius: 8,
-    width: '80%',
   },
-  modalText: { fontSize: 18, marginBottom: 10 },
+  errorText: {
+    color: 'red',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+    marginTop: 20,
+  },
+  button: {
+    backgroundColor: '#4A90E2',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 30,
+    elevation: 3,
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  question: {
+    marginBottom: 20,
+    fontSize: 18,
+    textAlign: 'center',
+    fontWeight: '500',
+  },
   resetContainer: {
     justifyContent: 'center',
     alignItems: 'center',
@@ -435,15 +538,70 @@ const styles = StyleSheet.create({
     fontSize: 18,
     marginBottom: 20,
     textAlign: 'center',
+    color: '#555',
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    padding: 24,
+    borderRadius: 16,
+    width: '85%',
+    shadowColor: '#000',
+    shadowOpacity: 0.3,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
+  },
+  modalText: {
+    fontSize: 18,
+    marginBottom: 12,
+    color: '#333',
   },
   modalViewButton: {
-    flexDirection: 'column', 
-    width: '100%', 
+    flexDirection: 'column',
+    width: '100%',
     marginTop: 20,
   },
   modalButton: {
-    width: '100%', 
-    marginVertical: 5, 
+    width: '100%',
+    marginVertical: 6,
+    borderRadius: 24,
+    overflow: 'hidden',
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 20,
+    color: '#333',
+  },
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+    gap: 10,
+  },
+  modalActions: {
+    marginTop: 20,
+    flexDirection: 'column',
+    gap: 10,
+  },
+  modalButtonStyled: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    borderRadius: 10,
+    gap: 10,
+  },
+  modalButtonText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 16,
   },
   linkText: {
     color: 'blue',
@@ -455,5 +613,6 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
 });
+
 
 export default SleepInterventionScreen;
