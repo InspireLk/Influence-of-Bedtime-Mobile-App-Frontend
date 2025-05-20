@@ -11,7 +11,8 @@ export interface AuthContextType {
   submit_survay_state:  any;
   submitSurvay?:(survayObject: any, _id:string) => Promise<void>;
   get_bedtime_predict_data?: (_id: string, stepCount:any) => Promise<void>;
-  bedtime_predicted_data:any
+  bedtime_predicted_data:any,
+  submitPushToken?:(token: any, _id:string) => Promise<void>;
   
 }
 

@@ -3,6 +3,7 @@ import { createMaterialTopTabNavigator } from '@react-navigation/material-top-ta
 import { useColorScheme } from '@/hooks/useColorScheme';
 import LoginScreen from '@/components/auth/Login';
 import RegisterScreen from '@/components/auth/Register';
+import React from 'react';
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -22,6 +23,7 @@ export default function AuthLayout() {
         Welcome to Good Night
       </Text>
       <Tab.Navigator
+          initialRouteName='Login'
           screenOptions={{
             tabBarLabelStyle: { fontSize: 16, fontWeight: 'bold' },
             tabBarIndicatorStyle: { 

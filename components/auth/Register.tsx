@@ -65,7 +65,7 @@ export default function RegisterScreen() {
     
     if(signup_state && signup_state.success){
       Toast.show({ type: 'success', text1: 'Registration successful!', position: 'bottom', swipeable: true });
-      router.replace('/(tabs)')
+      // router.replace('/(tabs)')
     }
 
   }, [signup_state])

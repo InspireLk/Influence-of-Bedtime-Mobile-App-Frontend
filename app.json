@@ -1,7 +1,12 @@
 {
   "expo": {
     "name": "Influence-of-Bedtime",
-    "slug": "Influence-of-Bedtime",
+    "slug": "influence-of-bedtime",
+    "extra": {
+      "eas": {
+        "projectId": "186d516d-5fc2-4ee9-a01d-34ab6ca975af"
+      }
+    },
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -20,10 +25,6 @@
         "backgroundColor": "#ffffff"
       },
       "permissions": [
-        "CAMERA",
-        "INTERNET",
-        "android.permission.CAMERA",
-        "android.permission.RECORD_AUDIO",
         "CAMERA",
         "INTERNET",
         "android.permission.CAMERA",
@@ -59,6 +60,7 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "owner": "influenceofbedtime"
   }
 }

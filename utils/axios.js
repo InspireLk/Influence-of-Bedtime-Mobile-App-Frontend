@@ -45,6 +45,7 @@ export const endpoints = {
     submit_survay: '/api/user/submit_survay',
     predict_bedtime: '/api/user/predict_bedtime',
     submit_survay: "/api/user/submit_survay",
+    submit_token: '/api/user/submit_token',
   },
   sleepPrediction: {
     addRecord: "/api/sleep/addRecord",
