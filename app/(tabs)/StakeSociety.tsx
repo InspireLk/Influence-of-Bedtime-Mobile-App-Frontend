@@ -1,56 +1,34 @@
 import axios, { endpoints } from "@/utils/axios";
 import { useFocusEffect } from "expo-router";
 import React, { useState, useEffect } from "react";
-import { StyleSheet, View, Text, Image } from "react-native";
+import {
+  StyleSheet,
+  View,
+  Text,
+  Image,
+  Modal,
+  TextInput,
+  Button,
+  TouchableOpacity,
+} from "react-native";
 import { Calendar } from "react-native-calendars";
 import { SleepRecord } from "./SleepPredictionScreen";
 
-const getMarkedDates = (dates: string[]) => {
+const getMarkedDates = (records: SleepRecord[]) => {
   let markedDates: { [date: string]: any } = {};
-
-  dates.forEach((date) => {
-    markedDates[date] = {
-      selected: true,
-      selectedColor: "#fbc02d",
-    };
+  records.forEach(({ date }) => {
+    markedDates[date] = { selected: true, selectedColor: "#fbc02d" };
   });
-
   return markedDates;
 };
 
-const getConsecutiveDays = (sleepDates: string[]) => {
-  const today = new Date().toISOString().split("T")[0];
-  let consecutiveDays = 0;
-
-  const sortedDates = sleepDates.sort(
-    (a, b) => new Date(b).getTime() - new Date(a).getTime()
-  );
-
-  for (let i = 0; i < sortedDates.length; i++) {
-    const current = new Date(sortedDates[i]);
-    const next = new Date(current);
-    next.setDate(current.getDate() + 1);
-
-    if (
-      next.toISOString().split("T")[0] === today ||
-      (i < sortedDates.length - 1 &&
-        next.toISOString().split("T")[0] === sortedDates[i + 1])
-    ) {
-      consecutiveDays++;
-    } else {
-      break;
-    }
-  }
-
-  return consecutiveDays;
-};
-
-export default function StakeSociety() {
-  const [streak, setStreak] = useState<number>(0);
-  const [sleepCount, setSleepCount] = useState<number>(0);
+export default function SleepTracker() {
   const [sleepRecords, setSleepRecords] = useState<SleepRecord[]>([]);
-  const [streakLost, setStreakLost] = useState<boolean>(false);
-  const [consecutiveDays, setConsecutiveDays] = useState<number>(0);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [sleepDuration, setSleepDuration] = useState<string>("");
+  const [selectedRecordId, setSelectedRecordId] = useState<string | null>(null);
+  const today = new Date().toISOString().split("T")[0];
 
   useFocusEffect(
     React.useCallback(() => {
@@ -59,29 +37,12 @@ export default function StakeSociety() {
           const response = await axios.get(
             endpoints.sleepPrediction.getAllRecords
           );
-          const data = await response.data;
-
-          const records: SleepRecord[] = data.map((item: any) => ({
+          const records: SleepRecord[] = response.data.map((item: any) => ({
+            id: item._id, // Using MongoDB _id
             date: item.date.split("T")[0],
             sleepDuration: item.sleepDuration,
           }));
-
-          const sortedRecords = records
-            .sort(
-              (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-            )
-            .slice(0, 5);
-
-          setSleepRecords(sortedRecords);
-          setStreak(sortedRecords.length);
-          setSleepCount(getCurrentMonthSleepCount(sortedRecords));
-          setStreakLost(
-            sortedRecords.length === 0 ||
-            !isStreakBroken(sortedRecords.map((rec) => rec.date))
-          );
-          setConsecutiveDays(
-            getConsecutiveDays(sortedRecords.map((rec) => rec.date))
-          );
+          setSleepRecords(records);
         } catch (error) {
           console.error("Error fetching sleep records", error);
         }
@@ -91,62 +52,74 @@ export default function StakeSociety() {
     }, [])
   );
 
-  const getCurrentMonthSleepCount = (records: SleepRecord[]): number => {
-    const today = new Date();
-    const currentMonth = today.getMonth();
-    const currentYear = today.getFullYear();
+  const handleDayPress = (day: { dateString: string }) => {
+    if (day.dateString > today) return; // Prevent selecting future dates
 
-    const filteredRecords = records.filter((record) => {
-      const recordedDate = new Date(record.date);
-      return (
-        recordedDate.getMonth() === currentMonth &&
-        recordedDate.getFullYear() === currentYear
-      );
-    });
+    setSelectedDate(day.dateString);
+    const record = sleepRecords.find((r) => r.date === day.dateString);
+    setSleepDuration(record ? String(record.sleepDuration) : "");
+    if (record?.id) setSelectedRecordId(record.id);
 
-    return filteredRecords.length;
+    setModalVisible(true);
   };
 
-  const isStreakBroken = (sleepDates: string[]) => {
-    const today = new Date().toISOString().split("T")[0];
-    let streakLost = false;
+  const handleUpdate = async () => {
+    if (!selectedDate) return;
 
-    for (let i = 0; i < sleepDates.length - 1; i++) {
-      const current = new Date(sleepDates[i]);
-      const next = new Date(sleepDates[i + 1]);
+    try {
+      if (selectedRecordId) {
+        // Update existing record using ID
+        await axios.put(
+          `${endpoints.sleepPrediction.updateRecord}/${selectedRecordId}`,
+          {
+            sleepDuration: Number(sleepDuration),
+          }
+        );
+      } else {
+        // Create new record
+        const response = await axios.post(endpoints.sleepPrediction.addRecord, {
+          date: selectedDate,
+          sleepDuration: Number(sleepDuration),
+        });
 
-      const diffInDays =
-        (next.getTime() - current.getTime()) / (1000 * 3600 * 24);
-      if (diffInDays > 1) {
-        streakLost = true;
-        break;
+        setSleepRecords([
+          ...sleepRecords,
+          {
+            id: response.data._id,
+            date: selectedDate,
+            sleepDuration: Number(sleepDuration),
+          },
+        ]);
       }
-    }
 
-    return streakLost;
+      setModalVisible(false);
+    } catch (error) {
+      console.error("Error updating record", error);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!selectedRecordId) return;
+
+    try {
+      await axios.delete(
+        `${endpoints.sleepPrediction.deleteRecord}/${selectedRecordId}`
+      );
+      setSleepRecords(sleepRecords.filter((r) => r.id !== selectedRecordId));
+      setModalVisible(false);
+    } catch (error) {
+      console.error("Error deleting record", error);
+    }
   };
 
   return (
     <View style={styles.container}>
-      {/* Streak Display */}
       <Image source={require("@/assets/images/fire.png")} style={styles.icon} />
-      <Text style={styles.title}></Text>
-      {!streakLost ? (
-        <Text style={styles.streakText}>
-          You are going strong for {consecutiveDays} consecutive days
-        </Text>
-      ) : (
-        <Text style={styles.streakText}>
-          Start recording to begin your streak
-        </Text>
-      )}
-      <Text style={styles.subtitle}>
-        Record a sleep not to lose your streak
-      </Text>
+      <Text style={styles.title}>Sleep Tracker</Text>
 
-      {/* Calendar */}
       <Calendar
-        markedDates={getMarkedDates(sleepRecords.map((record) => record.date))}
+        markedDates={getMarkedDates(sleepRecords)}
+        onDayPress={handleDayPress}
         style={{
           width: 350,
           height: 350,
@@ -162,6 +135,36 @@ export default function StakeSociety() {
           textDayHeaderFontSize: 14,
         }}
       />
+
+      {/* MODAL */}
+      <Modal visible={modalVisible} animationType="slide" transparent>
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>
+              Sleep Duration ({selectedDate})
+            </Text>
+
+            <TextInput
+              style={styles.input}
+              placeholder="Enter sleep duration (hrs)"
+              keyboardType="numeric"
+              value={sleepDuration}
+              onChangeText={setSleepDuration}
+            />
+
+            <View style={styles.buttonRow}>
+              <Button title="Update" onPress={handleUpdate} color="#4CAF50" />
+              {selectedRecordId && (
+                <Button title="Delete" onPress={handleDelete} color="#F44336" />
+              )}
+            </View>
+
+            <TouchableOpacity onPress={() => setModalVisible(false)}>
+              <Text style={styles.closeText}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -183,22 +186,41 @@ const styles = StyleSheet.create({
     fontSize: 30,
     fontWeight: "500",
   },
-  streakText: {
-    fontSize: 30,
-    fontWeight: "bold",
-
-    textAlign: "center",
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
   },
-  subtitle: {
-    fontSize: 14,
-    marginTop: 15,
-    color: "#666",
+  modalContent: {
+    width: 300,
+    padding: 20,
+    backgroundColor: "white",
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
     marginBottom: 10,
   },
-  sleepCountText: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#4CAF50",
+  input: {
+    width: "100%",
+    borderWidth: 1,
+    borderColor: "#ddd",
+    padding: 10,
+    borderRadius: 5,
+    marginBottom: 10,
+    textAlign: "center",
+  },
+  buttonRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+  },
+  closeText: {
     marginTop: 10,
+    color: "#ff5722",
+    fontWeight: "bold",
   },
 });

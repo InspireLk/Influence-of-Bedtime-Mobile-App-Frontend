@@ -18,7 +18,7 @@ export default function RegisterScreen() {
   const [age, setAge] = useState('20');
   const [occupation, setOccupation] = useState('SE');
   const [gender, setGender] = useState('Male');
-  const [height, setHeight] = useState('5.5');
+  const [height, setHeight] = useState('160');
   const [weight, setWeight] = useState('65');
   const [password, setPassword] = useState('sahan');
   const [confirmPassword, setConfirmPassword] = useState('sahan');
@@ -65,7 +65,7 @@ export default function RegisterScreen() {
     
     if(signup_state && signup_state.success){
       Toast.show({ type: 'success', text1: 'Registration successful!', position: 'bottom', swipeable: true });
-      router.replace('/(tabs)')
+      // router.replace('/(tabs)')
     }
 
   }, [signup_state])
