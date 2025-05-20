@@ -67,7 +67,21 @@ export default function HomeScreen() {
       Saturday: '',
       Sunday: ''
     },
+    sleepHours: '',
+    bedtimeActivity: '',
+    bedroomEnvironment: {
+      temperature: '',
+      light: '',
+      noise: '',
+      airQuality: '',
+      bedComfort: '',
+    },
+    physicalActivityBeforeBed: '',
+    diet: '',
+    dietOther: '',
+    employmentStatus: '',
   });
+
 
   const [user, setUser] = useState<any>(null);
 
@@ -94,7 +108,7 @@ export default function HomeScreen() {
   };
 
   const handleNextQuestion = () => {
-    if (currentQuestion < 3) {
+    if (currentQuestion < 8) {
       setCurrentQuestion(currentQuestion + 1);
     }
   };
@@ -218,7 +232,7 @@ export default function HomeScreen() {
             />
           </View>
         );
-        case 3:
+      case 3:
           return (
             <View>
               <Text style={styles.modalTitle}>Question 4/4</Text>
@@ -248,6 +262,140 @@ export default function HomeScreen() {
 
             </View>
           );
+      case 4:
+            return (
+              <View>
+                <Text style={styles.modalTitle}>Question 5/10</Text>
+                <Text style={styles.modalText}>How many hours of sleep are you currently getting?</Text>
+                {['Less than 5 hours', '5 hours', '6 hours', 'More than 7 hours'].map((option) => (
+                  <TouchableOpacity key={option} style={styles.radioButton} onPress={() => handleResponseChange('sleepHours', option)}>
+                    <View style={styles.radioCircle}>
+                      {surveyResponses.sleepHours === option && <View style={styles.selectedRb} />}
+                    </View>
+                    <Text style={styles.radioText}>{option}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            );
+      case 5:
+            return (
+              <View>
+                <Text style={styles.modalTitle}>Question 6/10</Text>
+                <Text style={styles.modalText}>What do you usually do before bed?</Text>
+                {['Social Media Apps', 'Entertainment Apps', 'Work-Related Tasks', 'Messaging Platforms'].map((option) => (
+                  <TouchableOpacity key={option} style={styles.radioButton} onPress={() => handleResponseChange('bedtimeActivity', option)}>
+                    <View style={styles.radioCircle}>
+                      {surveyResponses.bedtimeActivity === option && <View style={styles.selectedRb} />}
+                    </View>
+                    <Text style={styles.radioText}>{option}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            );
+      // case 6:
+      //       return (
+      //         <View>
+      //           <Text style={styles.modalTitle}>Question 7/10</Text>
+      //           <Text style={styles.modalText}>What are the environmental conditions in your bedroom?</Text>
+      //           {['temperature', 'light', 'noise', 'airQuality', 'bedComfort'].map((key) => {
+      //             const options = {
+      //               temperature: ['Hot', 'Warm', 'Cool'],
+      //               light: ['Bright', 'Dim', 'Dark'],
+      //               noise: ['Quiet', 'Some Noise', 'Loud'],
+      //               airQuality: ['Fresh', 'Stuffy'],
+      //               bedComfort: ['Comfortable', 'Neutral', 'Uncomfortable']
+      //             } as const;
+
+      //             type BedroomKey = keyof typeof options;
+      //             const keys: BedroomKey[] = ['temperature', 'light', 'noise', 'airQuality', 'bedComfort'];
+
+      //             return (
+      //               <View key={key}>
+      //                 <Text style={styles.modalText}>{key.charAt(0).toUpperCase() + key.slice(1)}</Text>
+      //                 {keys.map((key) => (
+      //                   <View key={key}>
+      //                     <Text style={styles.modalText}>{key.charAt(0).toUpperCase() + key.slice(1)}</Text>
+      //                     {options[key].map((opt) => (
+      //                       <TouchableOpacity
+      //                         key={opt}
+      //                         style={styles.radioButton}
+      //                         onPress={() =>
+      //                           setSurveyResponses((prev: any) => ({
+      //                             ...prev,
+      //                             bedroomEnvironment: {
+      //                               ...prev.bedroomEnvironment,
+      //                               [key]: opt
+      //                             }
+      //                           }))
+      //                         }>
+      //                         <View style={styles.radioCircle}>
+      //                           {surveyResponses.bedroomEnvironment[key] === opt && <View style={styles.selectedRb} />}
+      //                         </View>
+      //                         <Text style={styles.radioText}>{opt}</Text>
+      //                       </TouchableOpacity>
+      //                     ))}
+      //                   </View>
+      //                 ))}
+
+      //               </View>
+      //             );
+      //           })}
+      //         </View>
+      //       );
+      case 6:
+            return (
+              <View>
+                <Text style={styles.modalTitle}>Question 7/10</Text>
+                <Text style={styles.modalText}>How would you describe your physical activity before bed?</Text>
+                {['Yes, heavy workouts', 'Yes, light exercise (e.g., walking, stretching)', 'No physical activity'].map((option) => (
+                  <TouchableOpacity key={option} style={styles.radioButton} onPress={() => handleResponseChange('physicalActivityBeforeBed', option)}>
+                    <View style={styles.radioCircle}>
+                      {surveyResponses.physicalActivityBeforeBed === option && <View style={styles.selectedRb} />}
+                    </View>
+                    <Text style={styles.radioText}>{option}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            );
+      case 7:
+            return (
+              <View>
+                <Text style={styles.modalTitle}>Question 8/10</Text>
+                <Text style={styles.modalText}>What kind of diet are you following?</Text>
+                {['Balanced Diet', 'High-Protein', 'Low-Carb/Keto', 'Vegetarian/Vegan', 'Other'].map((option) => (
+                  <TouchableOpacity key={option} style={styles.radioButton} onPress={() => handleResponseChange('diet', option)}>
+                    <View style={styles.radioCircle}>
+                      {surveyResponses.diet === option && <View style={styles.selectedRb} />}
+                    </View>
+                    <Text style={styles.radioText}>{option}</Text>
+                  </TouchableOpacity>
+                ))}
+                {surveyResponses.diet === 'Other' && (
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Please specify"
+                    value={surveyResponses.dietOther}
+                    onChangeText={(text) => handleResponseChange('dietOther', text)}
+                  />
+                )}
+              </View>
+            );
+      case 8:
+            return (
+              <View>
+                <Text style={styles.modalTitle}>Question 9/10</Text>
+                <Text style={styles.modalText}>What is your current employment status?</Text>
+                {['Student', 'Employed', 'Student + Work', 'Unemployed'].map((option) => (
+                  <TouchableOpacity key={option} style={styles.radioButton} onPress={() => handleResponseChange('employmentStatus', option)}>
+                    <View style={styles.radioCircle}>
+                      {surveyResponses.employmentStatus === option && <View style={styles.selectedRb} />}
+                    </View>
+                    <Text style={styles.radioText}>{option}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            );
+
 
         
       default:
@@ -403,7 +551,7 @@ export default function HomeScreen() {
               {currentQuestion > 0 && (
                 <Button title="Previous" onPress={handlePreviousQuestion} />
               )}
-              {currentQuestion < 3 ? (
+              {currentQuestion < 7 ? (
                 <Button title="Next" onPress={handleNextQuestion} />
               ) : (
                 <Button title="Submit" onPress={handleSurveySubmit} />
