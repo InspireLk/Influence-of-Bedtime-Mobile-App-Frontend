@@ -245,6 +245,11 @@ export default function HomeScreen() {
                     <Text style={styles.dayText}>{day}</Text>
 
                     <MaterialIcons name="alarm-add" size={24} color="black" onPress={() => setPickerVisible((prev) => ({ ...prev, [day]: true }))}/>
+                    {selectedTime[day] && (
+                    <Text style={styles.selectedTimeText}>
+                      {selectedTime[day].toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </Text>
+                  )}
                     {pickerVisible[day] && (
                       <DateTimePickerModal
                         date={selectedTime[day]}
@@ -578,6 +583,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: 5,
+  },
+    selectedTimeText: {
+    fontSize: 14,
+    color: 'gray',
+    marginTop: 4,
   },
   cont: {
     backgroundColor: 'white',
