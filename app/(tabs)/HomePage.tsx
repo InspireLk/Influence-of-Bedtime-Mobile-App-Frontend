@@ -406,7 +406,7 @@ export default function HomeScreen() {
   const handleSurveySubmit = async() => {
     
     try {
-      
+
       await submitSurvay?.(surveyResponses,user._id);
 
     } catch (error) {

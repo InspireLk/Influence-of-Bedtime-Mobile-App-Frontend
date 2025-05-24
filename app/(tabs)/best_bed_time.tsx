@@ -92,7 +92,7 @@ export default function BestBedTimeScreen() {
   };
 
   const calculateBedtime = (sleepDuration:any, wakeUpTime:any) => {
-  
+
     const timeParts = wakeUpTime.match(/(\d+):(\d+)\s*(AM|PM)/i);
     if (!timeParts) {
       console.error("Invalid time format");
